@@ -2,143 +2,86 @@
 @tailwind components;
 @tailwind utilities;
 
-@import "tw-animate-css";
+/* 
+ * This file works together with styles/globals.css
+ * styles/globals.css contains the core theme definitions using Tailwind CSS v4 syntax
+ * This file adds component-level styling and ensures compatibility with traditional Tailwind usage
+ */
 
-:root {
-  /* Enhanced blue-themed color palette */
-  --background: #ffffff; /* Clean white background */
-  --foreground: #021024; /* Primary text color - deep navy blue */
-  --card: #f8fafc; /* Subtle off-white card background */
-  --card-foreground: #021024; /* Card text color */
-  --popover: #ffffff; /* Popover background */
-  --popover-foreground: #021024; /* Popover text color */
-  --primary: #5483B3; /* Primary color - medium blue for key elements */
-  --primary-foreground: #ffffff; /* Text on primary elements */
-  --secondary: #7DA0CA; /* Secondary color - lighter blue */
-  --secondary-foreground: #021024; /* Text on secondary elements */
-  --muted: #e2e8f0; /* Muted background elements */
-  --muted-foreground: #64748b; /* Text for muted elements */
-  --accent: #C1E844; /* Accent color - vibrant lime green for highlights */
-  --accent-foreground: #021024; /* Text on accent elements */
-  --destructive: #ef4444; /* Error/notification red */
-  --destructive-foreground: #ffffff; /* Text on destructive elements */
-  --border: #cbd5e1; /* Soft blue-gray borders */
-  --input: #f1f5f9; /* Input field background */
-  --ring: rgba(84, 131, 179, 0.4); /* Focus ring - medium blue with transparency */
-  --chart-1: #5483B3; /* Chart color 1 - medium blue */
-  --chart-2: #7DA0CA; /* Chart color 2 - light blue */
-  --chart-3: #C1E844; /* Chart color 3 - lime green */
-  --chart-4: #052659; /* Chart color 4 - deep blue */
-  --chart-5: #94a3b8; /* Chart color 5 - slate gray */
-  --radius: 0.5rem; /* Standard corner radius */
-  --sidebar: #f1f5f9; /* Sidebar background with subtle blue tone */
-  --sidebar-foreground: #021024; /* Sidebar text */
-  --sidebar-primary: #5483B3; /* Sidebar primary elements */
-  --sidebar-primary-foreground: #ffffff; /* Text on sidebar primary elements */
-  --sidebar-accent: #C1E844; /* Sidebar accent elements */
-  --sidebar-accent-foreground: #021024; /* Text on sidebar accent elements */
-  --sidebar-border: #cbd5e1; /* Sidebar borders */
-  --sidebar-ring: rgba(84, 131, 179, 0.4); /* Sidebar focus ring */
-}
-
-.dark {
-  /* Enhanced dark blue theme using the provided palette */
-  --background: #021024; /* Deep navy blue background */
-  --foreground: #f1f5f9; /* Light text for contrast */
-  --card: #052659; /* Medium blue card backgrounds */
-  --card-foreground: #f1f5f9; /* Light text on cards */
-  --popover: #052659; /* Popover backgrounds */
-  --popover-foreground: #f1f5f9; /* Text on popovers */
-  --primary: #5483B3; /* Primary elements - medium blue */
-  --primary-foreground: #021024; /* Text on primary elements */
-  --secondary: #7DA0CA; /* Secondary elements - light blue */
-  --secondary-foreground: #021024; /* Text on secondary elements */
-  --muted: #0f172a; /* Darker muted backgrounds */
-  --muted-foreground: #94a3b8; /* Muted text */
-  --accent: #C1E844; /* Accent elements - vibrant lime green */
-  --accent-foreground: #021024; /* Text on accent elements */
-  --destructive: #ef4444; /* Error/notification red */
-  --destructive-foreground: #ffffff; /* Text on destructive elements */
-  --border: #1e293b; /* Darker borders */
-  --input: #052659; /* Input fields */
-  --ring: rgba(84, 131, 179, 0.6); /* Focus ring with higher opacity */
-  --chart-1: #5483B3; /* Chart color 1 - medium blue */
-  --chart-2: #7DA0CA; /* Chart color 2 - light blue */
-  --chart-3: #C1E844; /* Chart color 3 - lime green */
-  --chart-4: #C1E844; /* Chart color 4 - lime green */
-  --chart-5: #94a3b8; /* Chart color 5 - slate gray */
-  --sidebar: #052659; /* Sidebar background */
-  --sidebar-foreground: #f1f5f9; /* Sidebar text */
-  --sidebar-primary: #5483B3; /* Sidebar primary elements */
-  --sidebar-primary-foreground: #021024; /* Text on sidebar primary elements */
-  --sidebar-accent: #C1E844; /* Sidebar accent elements */
-  --sidebar-accent-foreground: #021024; /* Text on sidebar accent elements */
-  --sidebar-border: #1e293b; /* Sidebar borders */
-  --sidebar-ring: rgba(84, 131, 179, 0.6); /* Sidebar focus ring */
-}
-
-/* Enhanced gradient classes for sophisticated design using the blue palette */
-@layer utilities {
-  .gradient-primary {
-    background: linear-gradient(135deg, #5483B3 0%, #052659 100%);
-  }
-
-  .gradient-accent {
-    background: linear-gradient(135deg, #C1E844 0%, #7DA0CA 100%);
-  }
-
-  .gradient-card-light {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
-  }
-  
-  .gradient-card-dark {
-    background: linear-gradient(135deg, rgba(5, 38, 89, 0.95) 0%, rgba(2, 16, 36, 0.9) 100%);
-  }
-  
-  /* Subtle text gradients for headings */
-  .text-gradient {
-    background: linear-gradient(135deg, #052659 0%, #5483B3 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  
-  .text-gradient-dark {
-    background: linear-gradient(135deg, #7DA0CA 0%, #C1E844 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-}
-
-/* Enhanced chart styles for better visibility in both themes */
 @layer base {
-  .recharts-cartesian-grid-line {
-    stroke: hsl(var(--border));
+  html, body {
+    height: 100%;
   }
   
-  .recharts-text {
-    fill: hsl(var(--muted-foreground));
+  body {
+    background-color: hsl(210 40% 95%); /* Light blue background */
+    color: hsl(210 40% 15%); /* Dark text */
   }
   
-  .dark .recharts-text {
-    fill: hsl(var(--muted-foreground));
+  .dark body {
+    background-color: hsl(210 40% 10%); /* Dark blue background */
+    color: hsl(210 40% 90%); /* Light text */
+  }
+}
+
+@layer components {
+  /* Define utility classes that may not be automatically generated */
+  .border-border {
+    border-color: hsl(210 40% 85%);
   }
   
-  .recharts-cartesian-axis-line,
-  .recharts-cartesian-axis-tick-line {
-    stroke: hsl(var(--border));
+  .dark .border-border {
+    border-color: hsl(210 40% 25%);
   }
   
-  .dark .recharts-cartesian-grid-line,
-  .dark .recharts-cartesian-axis-line,
-  .dark .recharts-cartesian-axis-tick-line {
-    stroke: hsl(var(--border));
+  .bg-background {
+    background-color: hsl(210 40% 95%);
   }
   
-  /* Improved chart tooltip styling */
-  .recharts-tooltip-wrapper .recharts-default-tooltip {
-    background-color: hsl(var(--popover)) !important;
-    border-color: hsl(var(--border)) !important;
+  .dark .bg-background {
+    background-color: hsl(210 40% 10%);
+  }
+  
+  .text-foreground {
+    color: hsl(210 40% 15%);
+  }
+  
+  .dark .text-foreground {
+    color: hsl(210 40% 90%);
+  }
+  
+  /* Gradient utilities using our theme colors */
+  .bg-gradient-primary {
+    background: linear-gradient(to right, hsl(210 33% 59%), hsl(210 27% 64%));
+  }
+  
+  .bg-gradient-card-light {
+    background: linear-gradient(to bottom right, hsl(210 40% 88%), hsl(210 40% 95%));
+  }
+  
+  .dark .bg-gradient-card-light {
+    background: linear-gradient(to bottom right, hsl(210 40% 20%), hsl(210 40% 10%));
+  }
+  
+  .bg-gradient-card-dark {
+    background: linear-gradient(to bottom right, hsl(210 40% 88%), hsl(0 0% 100%));
+  }
+  
+  .dark .bg-gradient-card-dark {
+    background: linear-gradient(to bottom right, hsl(210 40% 20%), hsl(210 40% 12%));
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  
+  /* Ensure smooth scrolling behavior */
+  html {
+    scroll-behavior: smooth;
   }
 }

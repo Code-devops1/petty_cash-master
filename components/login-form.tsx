@@ -50,6 +50,16 @@ export default function LoginForm() {
           {state?.error && (
             <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg">
               {state.error}
+              {state.error.includes("verify") && (
+                <div className="mt-2 text-sm">
+                  <Link 
+                    href="/auth/resend-verification" 
+                    className="underline hover:text-destructive-foreground"
+                  >
+                    Resend verification email
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 
@@ -68,9 +78,17 @@ export default function LoginForm() {
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-medium text-foreground">
-                Password
-              </label>
+              <div className="flex items-center justify-between">
+                <label htmlFor="password" className="block text-sm font-medium text-foreground">
+                  Password
+                </label>
+                <Link 
+                  href="/auth/reset-password" 
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <Input
                 id="password"
                 name="password"
@@ -87,6 +105,13 @@ export default function LoginForm() {
             Don't have an account?{" "}
             <Link href="/auth/sign-up" className="text-primary hover:underline font-medium">
               Sign up
+            </Link>
+          </div>
+          
+          <div className="text-center text-muted-foreground text-sm">
+            Didn't receive verification email?{" "}
+            <Link href="/auth/resend-verification" className="text-primary hover:underline font-medium">
+              Resend verification
             </Link>
           </div>
         </form>

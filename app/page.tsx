@@ -58,45 +58,19 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted">
-      {/* Header */}
-      <header className="bg-background/80 backdrop-blur-sm border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-3">
-              <div className="bg-gradient-primary p-2 rounded-lg">
-                <DollarSign className="h-6 w-6 text-white" />
-              </div>
-              <h1 className="text-xl font-bold text-foreground">CashFlow</h1>
-            </div>
-            <nav className="flex space-x-4">
-              <Link href="/auth/login">
-                <Button variant="ghost" className="text-foreground hover:text-primary hover:bg-primary/10">
-                  Sign In
-                </Button>
-              </Link>
-              <Link href="/auth/sign-up">
-                <Button className="bg-gradient-primary hover:opacity-90 text-primary-foreground">
-                  Get Started
-                </Button>
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
-
       {/* Hero Section */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-extrabold text-foreground tracking-tight">
-              Manage Petty Cash with <span className="text-gradient">Precision</span>
+              Manage Petty Cash with <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Precision</span>
             </h1>
             <p className="mt-6 max-w-lg mx-auto text-xl text-muted-foreground">
               Streamline your organization's petty cash management with our intuitive platform.
             </p>
             <div className="mt-10 flex justify-center gap-4">
               <Link href="/auth/sign-up">
-                <Button size="lg" className="bg-gradient-primary hover:opacity-90 text-primary-foreground px-8">
+                <Button size="lg" className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-primary-foreground px-8">
                   Start Free Trial
                 </Button>
               </Link>
@@ -111,7 +85,7 @@ export default async function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-muted/50">
+      <section className="py-20 bg-muted/50" id="features">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-foreground">Everything you need to manage finances</h2>
@@ -121,9 +95,9 @@ export default async function HomePage() {
           </div>
 
           <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="bg-gradient-card-light dark:bg-gradient-card-dark border-border shadow-lg">
+            <Card className="bg-background border-border shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
-                <div className="mx-auto bg-gradient-primary p-3 rounded-full w-14 h-14 flex items-center justify-center">
+                <div className="mx-auto bg-gradient-to-r from-primary to-secondary p-3 rounded-full w-14 h-14 flex items-center justify-center">
                   <Shield className="h-6 w-6 text-white" />
                 </div>
                 <CardTitle className="text-xl text-center text-foreground">Secure & Reliable</CardTitle>
@@ -135,9 +109,9 @@ export default async function HomePage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-card-light dark:bg-gradient-card-dark border-border shadow-lg">
+            <Card className="bg-background border-border shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
-                <div className="mx-auto bg-gradient-primary p-3 rounded-full w-14 h-14 flex items-center justify-center">
+                <div className="mx-auto bg-gradient-to-r from-primary to-secondary p-3 rounded-full w-14 h-14 flex items-center justify-center">
                   <Smartphone className="h-6 w-6 text-white" />
                 </div>
                 <CardTitle className="text-xl text-center text-foreground">Mobile Friendly</CardTitle>
@@ -149,9 +123,9 @@ export default async function HomePage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-card-light dark:bg-gradient-card-dark border-border shadow-lg">
+            <Card className="bg-background border-border shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
-                <div className="mx-auto bg-gradient-primary p-3 rounded-full w-14 h-14 flex items-center justify-center">
+                <div className="mx-auto bg-gradient-to-r from-primary to-secondary p-3 rounded-full w-14 h-14 flex items-center justify-center">
                   <TrendingUp className="h-6 w-6 text-white" />
                 </div>
                 <CardTitle className="text-xl text-center text-foreground">Real-time Analytics</CardTitle>
@@ -167,7 +141,7 @@ export default async function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-primary">
+      <section className="py-20 bg-gradient-to-r from-primary to-secondary" id="pricing">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-white">Ready to get started?</h2>
           <p className="mt-4 text-blue-100">
@@ -188,7 +162,9 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-2">
-              <DollarSign className="h-6 w-6 text-primary" />
+              <div className="bg-gradient-to-r from-primary to-secondary p-2 rounded-lg">
+                <DollarSign className="h-6 w-6 text-white" />
+              </div>
               <span className="text-xl font-bold text-foreground">CashFlow</span>
             </div>
             <p className="mt-4 text-muted-foreground">

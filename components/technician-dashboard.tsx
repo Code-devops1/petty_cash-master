@@ -13,8 +13,6 @@ import {
   DollarSign, 
   CheckCircle 
 } from "lucide-react"
-import DashboardHeader from "@/components/dashboard-header"
-
 interface TechnicianDashboardProps {
   profile: {
     full_name: string
@@ -33,11 +31,10 @@ export default function TechnicianDashboard({
   profile, 
   monthlyStats 
 }: TechnicianDashboardProps) {
+  
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <DashboardHeader user={profile} />
-      
-      <main className="flex-1 flex flex-col py-6 px-4 sm:px-6 lg:px-8">
+      <main className="flex-1 flex flex-col py-6 px-4 sm:px-6 lg:px-8 bg-background">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
           <p className="text-muted-foreground mt-1">Welcome back, {profile.full_name}</p>

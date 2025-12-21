@@ -19,8 +19,8 @@ export default async function SignUpPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted px-4 py-12 sm:px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <div className="mx-auto bg-primary/10 p-3 rounded-full w-16 h-16 flex items-center justify-center">
-            <span className="text-2xl font-bold text-primary">CF</span>
+          <div className="mx-auto bg-gradient-to-r from-primary to-secondary p-3 rounded-full w-16 h-16 flex items-center justify-center">
+            <span className="text-2xl font-bold text-white">CF</span>
           </div>
           <h2 className="mt-6 text-3xl font-bold text-foreground">Create an account</h2>
           <p className="mt-2 text-muted-foreground">

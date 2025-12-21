@@ -65,7 +65,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
       <div className="container flex h-14 items-center">
         <div className="mr-4 hidden md:flex">
           <Link className="mr-6 flex items-center space-x-2" href="/dashboard">
-            <div className="bg-gradient-primary p-1 rounded-lg">
+            <div className="bg-gradient-to-r from-primary to-secondary p-1 rounded-lg">
               <DollarSign className="h-6 w-6 text-white" />
             </div>
             <span className="hidden font-bold sm:inline-block text-foreground">CashFlow</span>
@@ -77,17 +77,14 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
             <Link href="/dashboard/transactions" className="transition-colors hover:text-primary">
               Transactions
             </Link>
-            <Link href="/dashboard/analytics" className="transition-colors hover:text-primary">
-              Analytics
-            </Link>
-            {user.role === "admin" && (
-              <Link href="/dashboard/admin" className="transition-colors hover:text-primary">
-                Admin
+            {(['admin', 'ADMIN', 'manager', 'MANAGER'].includes(user.role)) && (
+              <Link href="/dashboard/analytics" className="transition-colors hover:text-primary">
+                Analytics
               </Link>
             )}
-            {user.role === "manager" && (
+            {(user.role === "admin" || user.role === "manager") && (
               <Link href="/dashboard/admin" className="transition-colors hover:text-primary">
-                Management
+                {user.role === "admin" ? "Admin" : "Management"}
               </Link>
             )}
           </nav>
@@ -108,7 +105,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
               className="flex items-center text-foreground"
               onOpenChange={setMobileMenuOpen}
             >
-              <div className="bg-gradient-primary p-1 rounded-md mr-2">
+              <div className="bg-gradient-to-r from-primary to-secondary p-1 rounded-md mr-2">
                 <DollarSign className="h-4 w-4 text-white" />
               </div>
               <span className="font-bold">CashFlow</span>
@@ -129,13 +126,15 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                 >
                   Transactions
                 </MobileLink>
-                <MobileLink 
-                  href="/dashboard/analytics" 
-                  onOpenChange={setMobileMenuOpen}
-                  className="text-foreground hover:text-primary"
-                >
-                  Analytics
-                </MobileLink>
+                {(['admin', 'ADMIN', 'manager', 'MANAGER'].includes(user.role)) && (
+                  <MobileLink 
+                    href="/dashboard/analytics" 
+                    onOpenChange={setMobileMenuOpen}
+                    className="text-foreground hover:text-primary"
+                  >
+                    Analytics
+                  </MobileLink>
+                )}
                 {(user.role === "admin" || user.role === "manager") && (
                   <MobileLink 
                     href="/dashboard/admin" 
@@ -162,7 +161,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                   className="relative h-8 w-8 rounded-full hover:bg-primary/10"
                 >
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-gradient-primary">
+                    <AvatarFallback className="bg-gradient-to-r from-primary to-secondary">
                       <User className="h-4 w-4 text-white" />
                     </AvatarFallback>
                   </Avatar>

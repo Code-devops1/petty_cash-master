@@ -8,4 +8,6 @@
     "typescript": "typescriptreact"
   },
   "tailwindCSS.emmetCompletions": true
-}
+  
+
+  ,"terminal.integrated.defaultProfile.windows": "PowerShell"}
