@@ -79,6 +79,104 @@ export async function signIn(prevState: any, formData: FormData) {
   }
 }
 
+// Google OAuth sign in
+export async function signInWithGoogle() {
+  console.log("=== GOOGLE SIGN IN PROCESS STARTED ===");
+  
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        async getAll() {
+          return await cookieStore.getAll()
+        },
+        async setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(async ({ name, value, options }) => {
+              await cookieStore.set(name, value, options)
+            })
+          } catch {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+      },
+    }
+  )
+
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/dashboard`,
+      },
+    })
+
+    if (error) {
+      console.log("Google sign in error:", error.message);
+      return { error: error.message }
+    }
+
+    console.log("Google sign in successful, redirecting to:", data.url);
+    redirect(data.url)
+  } catch (error) {
+    console.error("Google sign in error:", error)
+    return { error: "An unexpected error occurred. Please try again." }
+  }
+}
+
+// Google OAuth sign up
+export async function signUpWithGoogle() {
+  console.log("=== GOOGLE SIGN UP PROCESS STARTED ===");
+  
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        async getAll() {
+          return await cookieStore.getAll()
+        },
+        async setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(async ({ name, value, options }) => {
+              await cookieStore.set(name, value, options)
+            })
+          } catch {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+      },
+    }
+  )
+
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/dashboard`,
+      },
+    })
+
+    if (error) {
+      console.log("Google sign up error:", error.message);
+      return { error: error.message }
+    }
+
+    console.log("Google sign up successful, redirecting to:", data.url);
+    redirect(data.url)
+  } catch (error) {
+    console.error("Google sign up error:", error)
+    return { error: "An unexpected error occurred. Please try again." }
+  }
+}
+
 // Sign up action
 export async function signUp(prevState: any, formData: FormData) {
   console.log("=== SIGN UP PROCESS STARTED ===");

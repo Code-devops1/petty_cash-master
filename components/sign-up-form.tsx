@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Loader2, DollarSign } from "lucide-react"
+import { Loader2, DollarSign, Chrome } from "lucide-react"
 import Link from "next/link"
-import { signUp } from "@/lib/actions"
+import { signUp, signUpWithGoogle } from "@/lib/actions"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -31,6 +31,24 @@ function SubmitButton() {
       ) : (
         "Create Account"
       )}
+    </Button>
+  )
+}
+
+function GoogleSignUpButton() {
+  const handleClick = () => {
+    signUpWithGoogle()
+  }
+
+  return (
+    <Button
+      type="button"
+      onClick={handleClick}
+      variant="outline"
+      className="w-full py-6 text-base font-medium rounded-lg h-[52px] border-border"
+    >
+      <Chrome className="mr-2 h-5 w-5" />
+      Sign up with Google
     </Button>
   )
 }
@@ -152,6 +170,18 @@ export default function SignUpForm() {
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
           <SubmitButton />
+          
+          <div className="relative my-4 w-full">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+            </div>
+          </div>
+          
+          <GoogleSignUpButton />
+          
           <div className="text-center text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link href="/auth/login" className="text-primary hover:underline font-medium">

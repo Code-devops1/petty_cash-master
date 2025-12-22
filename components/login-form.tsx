@@ -5,11 +5,11 @@ import { useFormStatus } from "react-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { Loader2, DollarSign } from "lucide-react"
+import { Loader2, DollarSign, Chrome } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
-import { signIn } from "@/lib/actions"
+import { signIn, signInWithGoogle } from "@/lib/actions"
 
 function SubmitButton() {
   const { pending } = useFormStatus()
@@ -28,6 +28,24 @@ function SubmitButton() {
       ) : (
         "Sign In"
       )}
+    </Button>
+  )
+}
+
+function GoogleSignInButton() {
+  const handleClick = () => {
+    signInWithGoogle()
+  }
+
+  return (
+    <Button
+      type="button"
+      onClick={handleClick}
+      variant="outline"
+      className="w-full py-6 text-base font-medium rounded-lg h-[52px] border-border"
+    >
+      <Chrome className="mr-2 h-5 w-5" />
+      Sign in with Google
     </Button>
   )
 }
@@ -100,6 +118,17 @@ export default function LoginForm() {
           </div>
 
           <SubmitButton />
+          
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+            </div>
+          </div>
+          
+          <GoogleSignInButton />
 
           <div className="text-center text-muted-foreground">
             Don't have an account?{" "}
