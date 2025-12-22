@@ -90,6 +90,7 @@ export default function ComprehensiveManagerDashboard({
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [notification, setNotification] = useState<{type: string, message: string} | null>(null);
 
   const supabase = createClient();
 
@@ -135,16 +136,21 @@ export default function ComprehensiveManagerDashboard({
     try {
       const { error } = await supabase
         .from("transactions")
-        .update({ status: "approved" })
+        .update({ status: "approved" } as any)
         .eq("id", transactionId);
 
       if (error) throw error;
       
+      // Show success notification
+      setNotification({type: "success", message: "Transaction approved successfully!"});
+      
       // Refresh data after approval
-      window.location.reload();
-    } catch (error) {
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } catch (error: any) {
       console.error("Error approving transaction:", error);
-      alert("Error approving transaction");
+      setNotification({type: "error", message: `Error approving transaction: ${error.message}`});
     }
   };
 
@@ -152,18 +158,33 @@ export default function ComprehensiveManagerDashboard({
     try {
       const { error } = await supabase
         .from("transactions")
-        .update({ status: "rejected" })
+        .update({ status: "rejected" } as any)
         .eq("id", transactionId);
 
       if (error) throw error;
       
+      // Show success notification
+      setNotification({type: "success", message: "Transaction rejected successfully!"});
+      
       // Refresh data after rejection
-      window.location.reload();
-    } catch (error) {
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } catch (error: any) {
       console.error("Error rejecting transaction:", error);
-      alert("Error rejecting transaction");
+      setNotification({type: "error", message: `Error rejecting transaction: ${error.message}`});
     }
   };
+
+  // Close notification after 5 seconds
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   return (
     <div className="flex h-screen bg-background">
@@ -389,6 +410,24 @@ export default function ComprehensiveManagerDashboard({
           <div className="w-10"></div> {/* Spacer for alignment */}
         </div>
 
+        {/* Notification Banner */}
+        {notification && (
+          <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${
+            notification.type === "success" 
+              ? "bg-green-100 text-green-800 border border-green-200" 
+              : "bg-red-100 text-red-800 border border-red-200"
+          }`}>
+            <div className="flex items-center">
+              {notification.type === "success" ? (
+                <CheckCircleIcon className="h-5 w-5 mr-2 text-green-600" />
+              ) : (
+                <XCircleIcon className="h-5 w-5 mr-2 text-red-600" />
+              )}
+              <span>{notification.message}</span>
+            </div>
+          </div>
+        )}
+
         <div className="p-4 md:p-6">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
@@ -526,6 +565,49 @@ export default function ComprehensiveManagerDashboard({
                   </CardContent>
                 </Card>
               </div>
+              
+              {/* Recent Activity Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Activity</CardTitle>
+                  <CardDescription>Latest transactions and team activity</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {transactions.slice(0, 5).map((transaction) => (
+                      <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <DollarSign className="h-5 w-5 text-primary" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{transaction.description}</p>
+                            <p className="text-sm text-muted-foreground">
+                              By {transaction.user_profiles?.full_name} • {new Date(transaction.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <Badge 
+                            variant={
+                              transaction.status === "completed"
+                                ? "default"
+                                : transaction.status === "approved"
+                                  ? "secondary"
+                                  : transaction.status === "pending"
+                                    ? "outline"
+                                    : "destructive"
+                            }
+                          >
+                            {transaction.status}
+                          </Badge>
+                          <span className="font-medium">KSh {transaction.amount?.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
 
@@ -614,7 +696,7 @@ export default function ComprehensiveManagerDashboard({
                                 variant="outline"
                                 onClick={() => handleRejectTransaction(transaction.id)}
                               >
-                                <XCircle className="mr-1 h-3 w-3" />
+                                <XCircleIcon className="mr-1 h-3 w-3" />
                                 Reject
                               </Button>
                             </>
