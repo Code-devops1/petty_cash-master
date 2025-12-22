@@ -134,13 +134,23 @@ export default function ComprehensiveManagerDashboard({
 
   const handleApproveTransaction = async (transactionId: string) => {
     try {
-      const { error } = await supabase
-        .from("transactions")
-        .update({ status: "approved" } as any)
-        .eq("id", transactionId);
+      const response = await fetch("/api/transactions/approve", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          transactionId,
+          action: "approve",
+        }),
+      });
 
-      if (error) throw error;
-      
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to approve transaction");
+      }
+
       // Show success notification
       setNotification({type: "success", message: "Transaction approved successfully!"});
       
@@ -156,13 +166,23 @@ export default function ComprehensiveManagerDashboard({
 
   const handleRejectTransaction = async (transactionId: string) => {
     try {
-      const { error } = await supabase
-        .from("transactions")
-        .update({ status: "rejected" } as any)
-        .eq("id", transactionId);
+      const response = await fetch("/api/transactions/approve", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          transactionId,
+          action: "reject",
+        }),
+      });
 
-      if (error) throw error;
-      
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to reject transaction");
+      }
+
       // Show success notification
       setNotification({type: "success", message: "Transaction rejected successfully!"});
       

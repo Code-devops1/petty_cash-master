@@ -28,40 +28,55 @@ export async function POST(request: Request) {
   }
   
   const body = await request.json()
-  const { transaction_id } = body
+  const { transactionId, action } = body // Using transactionId instead of transaction_id
   
   try {
     // Get transaction details
     const { data: transaction, error: transactionError } = await supabase
       .from("transactions")
       .select("*")
-      .eq("id", transaction_id)
+      .eq("id", transactionId)
       .single()
       
     if (transactionError) {
       return NextResponse.json({ error: "Transaction not found" }, { status: 404 })
     }
     
+    let updateData: any = {};
+    
+    if (action === "approve") {
+      // For approval, set status to 'approved' (not 'COMPLETED' as this is just approval)
+      updateData = { 
+        status: "approved",
+        approved_by: user.id,
+        approved_at: new Date().toISOString()
+      }
+    } else if (action === "reject") {
+      // For rejection, set status to 'rejected'
+      updateData = { 
+        status: "rejected"
+      }
+    } else {
+      return NextResponse.json({ error: "Invalid action" }, { status: 400 })
+    }
+    
     // Update transaction status
     const { error: updateError } = await supabase
       .from("transactions")
-      .update({ 
-        status: "COMPLETED",
-        approved_at: new Date().toISOString()
-      })
-      .eq("id", transaction_id)
+      .update(updateData)
+      .eq("id", transactionId)
       
     if (updateError) {
-      return NextResponse.json({ error: "Failed to approve transaction" }, { status: 500 })
+      return NextResponse.json({ error: "Failed to update transaction" }, { status: 500 })
     }
     
     return NextResponse.json({ 
       success: true, 
-      message: "Transaction approved successfully",
-      transaction_id 
+      message: `Transaction ${action === "approve" ? "approved" : "rejected"} successfully`,
+      transactionId 
     })
   } catch (error) {
-    console.error("Error approving transaction:", error)
+    console.error("Error updating transaction:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

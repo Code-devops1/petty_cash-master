@@ -1,6 +1,7 @@
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import ComprehensiveAdminDashboard from "@/components/comprehensive-admin-dashboard"
+import ComprehensiveManagerDashboard from "@/components/comprehensive-manager-dashboard"
 import TechnicianDashboard from "@/components/technician-dashboard"
 
 export default async function DashboardPage() {
@@ -38,9 +39,7 @@ export default async function DashboardPage() {
     userProfile?.role === "admin" ||
     userProfile?.role === "ADMIN" ||
     userProfile?.role === "super_admin" ||
-    userProfile?.role === "finance_admin" ||
-    userProfile?.role === "manager" ||
-    userProfile?.role === "MANAGER"
+    userProfile?.role === "finance_admin"
   ) {
     // Get all transactions for admin view
     let allTransactions = [];
@@ -108,6 +107,73 @@ export default async function DashboardPage() {
         users={users}
         systemStats={systemStats}
         disbursements={disbursements}
+      />
+    )
+  }
+
+  // For manager users, prepare department-specific data
+  if (
+    userProfile?.role === "manager" ||
+    userProfile?.role === "MANAGER"
+  ) {
+    // Get department transactions for manager view
+    let departmentTransactions = [];
+    let departmentStats = {
+      totalAmount: 0,
+      pendingCount: 0,
+      completedCount: 0
+    };
+    let teamMembers = [];
+    
+    try {
+      // Get transactions for the manager's department
+      // Note: This assumes the manager's department is stored in user metadata
+      // In a real implementation, you might need to get the manager's department differently
+      const { data: transactionsData } = await supabase
+        .from("transactions")
+        .select(`
+          *,
+          user_id:user_id
+        `)
+        .order("created_at", { ascending: false })
+        .limit(100)
+      
+      departmentTransactions = transactionsData || []
+      
+      // Get department-specific statistics
+      const totalAmount = departmentTransactions.reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0)
+      const pendingCount = departmentTransactions.filter((t: any) => t.status === "PENDING").length
+      const completedCount = departmentTransactions.filter((t: any) => t.status === "COMPLETED").length
+      
+      departmentStats = {
+        totalAmount,
+        pendingCount,
+        completedCount
+      }
+      
+      // Get team members (users with the same department as the manager)
+      const { data: usersData, error: usersError } = await supabase
+        .from("users")
+        .select("*")
+        .order("created_at", { ascending: false })
+      
+      if (usersError) {
+        console.error("Error fetching users:", usersError)
+      } else {
+        teamMembers = usersData || []
+      }
+    } catch (error) {
+      console.error('Error fetching manager data:', error)
+    }
+
+    return (
+      <ComprehensiveManagerDashboard
+        user={user}
+        profile={userProfile}
+        transactions={departmentTransactions}
+        users={teamMembers}
+        departmentStats={departmentStats}
+        teamMembers={teamMembers}
       />
     )
   }
