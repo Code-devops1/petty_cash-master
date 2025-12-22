@@ -667,3 +667,209 @@ export async function createTransaction(formData: FormData) {
   revalidatePath("/dashboard")
   revalidatePath("/dashboard/transactions")
 }
+
+export async function toggleUserStatus(userId: string, currentStatus: boolean) {
+  console.log("=== TOGGLE USER STATUS PROCESS STARTED ===");
+  console.log("Toggling status for user:", userId);
+  
+  try {
+    const supabase = createClient();
+    
+    // Update user status
+    const { error } = await supabase
+      .from('users')
+      .update({ is_active: !currentStatus })
+      .eq('id', userId);
+
+    if (error) {
+      console.log("Error toggling user status:", error.message);
+      return { error: error.message };
+    }
+
+    console.log("User status updated successfully");
+    console.log("=== TOGGLE USER STATUS PROCESS COMPLETED ===");
+    return { success: "User status updated successfully" };
+  } catch (error) {
+    console.error("Toggle user status error:", error);
+    return { error: "An unexpected error occurred. Please try again." };
+  }
+}
+
+export async function addUser(userData: any) {
+  console.log("=== ADD USER PROCESS STARTED ===");
+  console.log("Adding new user:", userData);
+  
+  try {
+    const supabase = createClient();
+    
+    // Insert new user
+    const { error } = await supabase
+      .from('users')
+      .insert([userData]);
+
+    if (error) {
+      console.log("Error adding user:", error.message);
+      return { error: error.message };
+    }
+
+    console.log("User added successfully");
+    console.log("=== ADD USER PROCESS COMPLETED ===");
+    return { success: "User added successfully" };
+  } catch (error) {
+    console.error("Add user error:", error);
+    return { error: "An unexpected error occurred. Please try again." };
+  }
+}
+
+export async function updateUser(userId: string, userData: any) {
+  console.log("=== UPDATE USER PROCESS STARTED ===");
+  console.log("Updating user:", userId, userData);
+  
+  try {
+    const supabase = createClient();
+    
+    // Update user
+    const { error } = await supabase
+      .from('users')
+      .update(userData)
+      .eq('id', userId);
+
+    if (error) {
+      console.log("Error updating user:", error.message);
+      return { error: error.message };
+    }
+
+    console.log("User updated successfully");
+    console.log("=== UPDATE USER PROCESS COMPLETED ===");
+    return { success: "User updated successfully" };
+  } catch (error) {
+    console.error("Update user error:", error);
+    return { error: "An unexpected error occurred. Please try again." };
+  }
+}
+
+// Admin creates a new user
+export async function adminCreateUser(
+  email: string,
+  password: string,
+  fullName: string,
+  phoneNumber: string | null,
+  employeeId: string | null,
+  role: string,
+  department: string | null
+) {
+  console.log("=== ADMIN CREATE USER PROCESS STARTED ===");
+  
+  console.log("Creating user with data:", { email, fullName, phoneNumber, employeeId, role, department });
+
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        async getAll() {
+          return await cookieStore.getAll()
+        },
+        async setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(async ({ name, value, options }) => {
+              await cookieStore.set(name, value, options)
+            })
+          } catch {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+      },
+    }
+  )
+
+  try {
+    console.log("Checking if user already exists in auth system");
+    // First check if user already exists in public.users table
+    const { data: existingUser, error: existingUserError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .single();
+
+    if (existingUser && !existingUserError) {
+      console.log("User already exists in users table");
+      return { error: "An account with this email already exists." };
+    }
+
+    console.log("Attempting to create user with Supabase Auth");
+    // Create the user with Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+          phone_number: phoneNumber || null,
+          employee_id: employeeId || null,
+          role
+        },
+        emailRedirectTo:
+          process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ||
+          `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/dashboard`,
+      },
+    })
+
+    console.log("Supabase auth response:", { authData, authError });
+
+    if (authError) {
+      console.log("Supabase auth error:", authError.message);
+      return { error: authError.message }
+    }
+
+    // Check if user was created successfully
+    if (!authData?.user) {
+      console.log("User creation failed - no user data returned");
+      return { error: "Failed to create user account. Please try again." };
+    }
+
+    console.log("User created successfully in auth system with ID:", authData.user.id);
+    
+    // Check if confirmation email will be sent
+    if (authData.user.identities && authData.user.identities.length === 0) {
+      console.log("User might already exist or there was an issue with identity creation");
+      return { 
+        error: "There was an issue creating the account. If the user already has an account, please use a different email." 
+      };
+    }
+
+    // Also add the user to the public.users table
+    console.log("Adding user to public.users table");
+    const { error: insertError } = await supabase
+      .from('users')
+      .insert({
+        id: authData.user.id,
+        email,
+        full_name: fullName,
+        phone_number: phoneNumber || null,
+        role,
+        employee_id: employeeId || null,
+        department: department || null
+      });
+
+    if (insertError) {
+      console.log("Error inserting user into public.users table:", insertError);
+      // This is not a critical error, but we should log it
+      // The sync script can be run later to sync users
+    } else {
+      console.log("User successfully added to public.users table");
+    }
+    
+    console.log("=== ADMIN CREATE USER PROCESS COMPLETED SUCCESSFULLY ===");
+    return { 
+      success: "User account created successfully! The user will receive an email with instructions to set their password.", 
+      userId: authData.user.id 
+    };
+  } catch (error) {
+    console.error("Admin create user error:", error)
+    return { error: "An unexpected error occurred. Please try again." }
+  }
+}

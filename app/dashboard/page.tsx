@@ -50,6 +50,7 @@ export default async function DashboardPage() {
       completedCount: 0
     };
     let disbursements = [];
+    let users = [];
     
     try {
       const { data: transactionsData } = await supabase
@@ -83,6 +84,18 @@ export default async function DashboardPage() {
         .limit(50)
       
       disbursements = disbursementsData || []
+
+      // Get all users
+      const { data: usersData, error: usersError } = await supabase
+        .from("users")
+        .select("*")
+        .order("created_at", { ascending: false })
+      
+      if (usersError) {
+        console.error("Error fetching users:", usersError)
+      } else {
+        users = usersData || []
+      }
     } catch (error) {
       console.error('Error fetching admin data:', error)
     }
@@ -92,7 +105,7 @@ export default async function DashboardPage() {
         user={user}
         profile={userProfile}
         transactions={allTransactions}
-        users={[]} // Empty array since we can't access users table
+        users={users}
         systemStats={systemStats}
         disbursements={disbursements}
       />
