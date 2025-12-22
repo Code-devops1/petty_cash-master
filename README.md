@@ -1,4 +1,4 @@
-o help me set up the personal access token# Petty Cash System
+# Petty Cash System
 
 A comprehensive solution for managing petty cash expenses and approvals within organizations.
 
@@ -27,31 +27,36 @@ The Petty Cash System is designed to streamline the process of managing small-sc
 - **Build Tool**: Next.js Built-in
 - **Package Manager**: pnpm
 
-## Getting Started
+## Prerequisites
 
-### Prerequisites
+Before you begin, ensure you have the following installed:
+- Node.js 18+ (Recommended: Node.js 20+)
+- pnpm (Recommended package manager for this project)
 
-- Node.js 18+
-- pnpm
-- Supabase account
-
-### Installation
+## Quick Setup
 
 1. Clone the repository:
    ```bash
    git clone <your-repo-url>
+   cd petty_cash_system
    ```
 
-2. Install dependencies:
+2. Install dependencies using pnpm (recommended):
    ```bash
    pnpm install
    ```
+   
+   Note: This project uses pnpm for better disk space efficiency. If you don't have pnpm installed:
+   ```bash
+   npm install -g pnpm
+   ```
 
 3. Set up environment variables:
-   Create a `.env.local` file with your Supabase credentials:
+   Create a `.env.local` file in the root directory with your Supabase credentials:
    ```env
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
    ```
 
 4. Run the development server:
@@ -60,6 +65,14 @@ The Petty Cash System is designed to streamline the process of managing small-sc
    ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## Database Setup
+
+1. Create a new Supabase project at [https://supabase.com/](https://supabase.com/)
+2. Run the SQL scripts in the `scripts/` directory in order:
+   - [01-create-tables.sql](file:///C:/Users/Administrator/Downloads/petty_cash-master/petty_cash-master/scripts/01-create-tables.sql)
+   - [02-seed-data.sql](file:///C:/Users/Administrator/Downloads/petty_cash-master/petty_cash-master/scripts/02-seed-data.sql)
+   - And any other necessary scripts
 
 ## Project Structure
 
@@ -79,6 +92,32 @@ styles/           # Global styles
 - `pnpm build` - Builds the app for production
 - `pnpm start` - Runs the built app in production mode
 - `pnpm lint` - Runs the linter
+
+## Recommended Development Workflow
+
+1. Use pnpm as your package manager to avoid conflicts with existing lock files
+2. Make sure to run database migrations when pulling updates
+3. Check the scripts directory for any new migration files
+
+## Troubleshooting
+
+### Dependency Issues
+
+If you encounter issues with dependencies:
+
+1. Remove existing lock files and node_modules:
+   ```bash
+   rm -rf node_modules package-lock.json pnpm-lock.yaml
+   ```
+
+2. Reinstall with pnpm:
+   ```bash
+   pnpm install
+   ```
+
+### Environment Variables
+
+Ensure all required environment variables are set in your `.env.local` file.
 
 ## Deployment
 

@@ -2,10 +2,14 @@
 
 # dependencies
 /node_modules
+/.pnp
+.pnp.js
 
 # next.js
 /.next/
 /out/
+/server/
+/.tmp/
 
 # production
 /build
@@ -18,6 +22,7 @@ yarn-error.log*
 
 # env files
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -25,3 +30,50 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Lock files (keep only one)
+package-lock.json
+yarn.lock
+
+# Logs
+logs
+*.log
+
+# Temp files
+*.tmp
+*.temp
+
+# Build artifacts
+dist/
+build/
+
+# Cache directories
+.cache/
+.tmp/
+
+# Coverage
+coverage/
+
+# Local development files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Editor directories
+.idea/
+*.sublime-project
+*.sublime-workspace
