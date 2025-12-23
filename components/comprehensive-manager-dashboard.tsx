@@ -87,11 +87,11 @@ export default function ComprehensiveManagerDashboard({
   teamMembers,
 }: ComprehensiveManagerDashboardProps) {
   const [activeTab, setActiveTab] = useState("overview");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [notification, setNotification] = useState<{type: string, message: string} | null>(null);
 
   const supabase = createClient();
@@ -198,7 +198,7 @@ export default function ComprehensiveManagerDashboard({
     }
   };
 
-  // Close notification after 5 seconds
+  // Auto-hide notification after 5 seconds
   useEffect(() => {
     if (notification) {
       const timer = setTimeout(() => {
@@ -209,9 +209,9 @@ export default function ComprehensiveManagerDashboard({
   }, [notification]);
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Sidebar for larger screens, collapsible on mobile */}
-      <div className="hidden md:w-64 bg-card border-r border-border md:flex flex-col">
+    <div className="flex h-screen bg-background overflow-hidden">
+      {/* Sidebar */}
+      <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-card border-r border-border transition-all duration-300 flex flex-col`}>
         <div className="p-6">
           <h2 className="text-xl font-bold text-primary">Easy Net Solutions</h2>
           <p className="text-sm text-muted-foreground">Manager Portal</p>
@@ -256,6 +256,14 @@ export default function ComprehensiveManagerDashboard({
           >
             <FileText className="mr-2 h-4 w-4" />
             Reports
+          </Button>
+          <Button
+            variant={activeTab === "communication" ? "default" : "ghost"}
+            className="w-full justify-start"
+            onClick={() => setActiveTab("communication")}
+          >
+            <Send className="mr-2 h-4 w-4" />
+            Communication
           </Button>
         </nav>
 
@@ -309,127 +317,35 @@ export default function ComprehensiveManagerDashboard({
         </div>
       </div>
 
-      {/* Mobile sidebar - shown when mobileSidebarOpen is true */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:hidden flex flex-col`}>
-        <div className="p-6 border-b border-border">
-          <h2 className="text-xl font-bold text-primary">Easy Net Solutions</h2>
-          <p className="text-sm text-muted-foreground">Manager Portal</p>
-        </div>
-        <nav className="p-4 space-y-2 flex-1">
-          <Button
-            variant={activeTab === "overview" ? "default" : "ghost"}
-            className="w-full justify-start"
-            onClick={() => { setActiveTab("overview"); setMobileSidebarOpen(false); }}
-          >
-            <Activity className="mr-2 h-4 w-4" />
-            Overview
-          </Button>
-          <Button
-            variant={activeTab === "transactions" ? "default" : "ghost"}
-            className="w-full justify-start"
-            onClick={() => { setActiveTab("transactions"); setMobileSidebarOpen(false); }}
-          >
-            <DollarSign className="mr-2 h-4 w-4" />
-            Transactions
-          </Button>
-          <Button
-            variant={activeTab === "team" ? "default" : "ghost"}
-            className="w-full justify-start"
-            onClick={() => { setActiveTab("team"); setMobileSidebarOpen(false); }}
-          >
-            <Users className="mr-2 h-4 w-4" />
-            Team Management
-          </Button>
-          <Button
-            variant={activeTab === "analytics" ? "default" : "ghost"}
-            className="w-full justify-start"
-            onClick={() => { setActiveTab("analytics"); setMobileSidebarOpen(false); }}
-          >
-            <TrendingUp className="mr-2 h-4 w-4" />
-            Analytics
-          </Button>
-          <Button
-            variant={activeTab === "reports" ? "default" : "ghost"}
-            className="w-full justify-start"
-            onClick={() => { setActiveTab("reports"); setMobileSidebarOpen(false); }}
-          >
-            <FileText className="mr-2 h-4 w-4" />
-            Reports
-          </Button>
-        </nav>
-        <div className="p-4 border-t border-border">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <div className="flex items-center space-x-3 cursor-pointer">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-primary font-semibold">
-                    {profile.full_name?.charAt(0)?.toUpperCase() || 'U'}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{profile.full_name}</p>
-                  <p className="text-xs text-muted-foreground capitalize">{profile.role}</p>
-                </div>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-primary font-semibold">
-                    {profile.full_name?.charAt(0)?.toUpperCase() || 'U'}
-                  </span>
-                </div>
-                <div>
-                  <p className="font-medium">{profile.full_name}</p>
-                  <p className="text-sm text-muted-foreground capitalize">{profile.role}</p>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex items-center space-x-2 cursor-pointer">
-                <Settings className="h-4 w-4" />
-                <span>Settings</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <form action={signOut}>
-                  <button type="submit" className="flex items-center space-x-2 w-full cursor-pointer">
-                    <LogOut className="h-4 w-4" />
-                    <span>Sign Out</span>
-                  </button>
-                </form>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
 
-      {/* Overlay for mobile sidebar */}
-      {mobileSidebarOpen && (
-        <div 
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 md:hidden"
-          onClick={() => setMobileSidebarOpen(false)}
-        ></div>
-      )}
-
-      {/* Main content area */}
+      {/* Main Content */}
       <div className="flex-1 overflow-auto">
-        {/* Mobile header with hamburger menu */}
-        <div className="md:hidden p-4 border-b border-border flex items-center justify-between">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-            className="p-2"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </Button>
-          <h1 className="text-xl font-bold text-foreground">Manager Dashboard</h1>
-          <div className="w-10"></div> {/* Spacer for alignment */}
+        {/* Mobile Header */}
+        <div className="md:hidden p-4 border-b flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="h-8 w-8 p-0"
+            >
+              <span className="sr-only">Toggle sidebar</span>
+              <svg
+                className={`h-4 w-4`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </Button>
+            <h1 className="text-xl font-bold">Manager Dashboard</h1>
+          </div>
         </div>
 
         {/* Notification Banner */}
@@ -1062,19 +978,38 @@ export default function ComprehensiveManagerDashboard({
                       <h3 className="text-lg font-medium mb-4">Spending Trends</h3>
                       <ResponsiveContainer width="100%" height={300}>
                         <LineChart
-                          data={[
-                            { month: "Jan", amount: 85000 },
-                            { month: "Feb", amount: 102000 },
-                            { month: "Mar", amount: 98000 },
-                            { month: "Apr", amount: 125000 },
-                            { month: "May", amount: 118000 },
-                            { month: "Jun", amount: 142000 },
-                          ]}
+                          data={(() => {
+                            // Group transactions by month
+                            const monthlyData: any = {};
+                            
+                            transactions.forEach((transaction: any) => {
+                              if (transaction.created_at) {
+                                const date = new Date(transaction.created_at);
+                                const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                                
+                                if (!monthlyData[monthYear]) {
+                                  monthlyData[monthYear] = 0;
+                                }
+                                
+                                monthlyData[monthYear] += Number(transaction.amount) || 0;
+                              }
+                            });
+                            
+                            // Convert to chart data format
+                            return Object.entries(monthlyData).map(([monthYear, amount]) => {
+                              const [year, month] = monthYear.split('-');
+                              const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                              return {
+                                month: `${monthNames[parseInt(month) - 1]} ${year}`,
+                                amount: amount as number
+                              };
+                            }).sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
+                          })()}
                         >
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="month" />
                           <YAxis />
-                          <Tooltip />
+                          <Tooltip formatter={(value) => [`KSh ${Number(value).toLocaleString()}`, 'Amount']} />
                           <Line type="monotone" dataKey="amount" stroke="#84cc16" strokeWidth={2} />
                         </LineChart>
                       </ResponsiveContainer>
@@ -1084,27 +1019,54 @@ export default function ComprehensiveManagerDashboard({
                       <ResponsiveContainer width="100%" height={300}>
                         <PieChart>
                           <Pie
-                            data={[
-                              { name: "Used", value: 75, fill: "#ef4444" },
-                              { name: "Remaining", value: 25, fill: "#10b981" },
-                            ]}
+                            data={(() => {
+                              const approvedAmount = transactions
+                                .filter((t: any) => t.status === 'approved' || t.status === 'completed')
+                                .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0);
+                              
+                              // Calculate department budget (this would come from budget_limits table in a real implementation)
+                              const monthlyBudget = 500000; // This should be fetched from budget_limits table
+                              const remaining = Math.max(0, monthlyBudget - approvedAmount);
+                              
+                              return [
+                                { name: "Used", value: approvedAmount, fill: "#ef4444" },
+                                { name: "Remaining", value: remaining, fill: "#10b981" },
+                              ];
+                            })()}
                             cx="50%"
                             cy="50%"
                             innerRadius={60}
                             outerRadius={80}
                             label
                           >
-                            {[
-                              { name: "Used", value: 75, fill: "#ef4444" },
-                              { name: "Remaining", value: 25, fill: "#10b981" },
-                            ].map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.fill} />
-                            ))}
+                            {(() => {
+                              const data = [
+                                { name: "Used", value: transactions
+                                  .filter((t: any) => t.status === 'approved' || t.status === 'completed')
+                                  .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0), fill: "#ef4444" },
+                                { name: "Remaining", value: Math.max(0, 500000 - transactions
+                                  .filter((t: any) => t.status === 'approved' || t.status === 'completed')
+                                  .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0)), fill: "#10b981" },
+                              ];
+                              
+                              return data.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={entry.fill} />
+                              ));
+                            })()}
                           </Pie>
-                          <Tooltip />
+                          <Tooltip formatter={(value) => [`KSh ${Number(value).toLocaleString()}`, 'Amount']} />
                         </PieChart>
                         <div className="mt-4 text-center">
-                          <p className="text-2xl font-bold">75%</p>
+                          <p className="text-2xl font-bold">
+                            {(() => {
+                              const approvedAmount = transactions
+                                .filter((t: any) => t.status === 'approved' || t.status === 'completed')
+                                .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0);
+                              const monthlyBudget = 500000;
+                              const utilization = monthlyBudget > 0 ? Math.round((approvedAmount / monthlyBudget) * 100) : 0;
+                              return `${utilization}%`;
+                            })()}
+                          </p>
                           <p className="text-sm text-muted-foreground">of department budget used</p>
                         </div>
                       </ResponsiveContainer>
@@ -1120,66 +1082,48 @@ export default function ComprehensiveManagerDashboard({
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {[
-                        { category: "Transport", amount: 35000, percentage: 32 },
-                        { category: "Materials", amount: 28000, percentage: 26 },
-                        { category: "Food", amount: 18000, percentage: 17 },
-                        { category: "Emergency", amount: 12000, percentage: 11 },
-                        { category: "Others", amount: 15000, percentage: 14 }
-                      ].map((item, index) => (
-                        <div key={index} className="space-y-1">
-                          <div className="flex justify-between">
-                            <span className="text-sm font-medium">{item.category}</span>
-                            <span className="text-sm font-medium">KSh {item.amount.toLocaleString()}</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
-                              className="bg-primary h-2 rounded-full" 
-                              style={{ width: `${item.percentage}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Budget Monitoring</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-between">
-                        <span>Monthly Budget</span>
-                        <span className="font-medium">KSh 500,000</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-3">
-                        <div className="bg-blue-500 h-3 rounded-full" style={{ width: "65%" }}></div>
-                      </div>
-                      
-                      <div className="flex justify-between">
-                        <span>Spent This Month</span>
-                        <span className="font-medium">KSh 325,000</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-3">
-                        <div className="bg-green-500 h-3 rounded-full" style={{ width: "72%" }}></div>
-                      </div>
-                      
-                      <div className="flex justify-between">
-                        <span>Remaining</span>
-                        <span className="font-medium">KSh 175,000</span>
-                      </div>
-                      
-                      <div className="pt-4">
-                        <h4 className="font-medium mb-2">Budget Alerts</h4>
-                        <div className="space-y-2">
-                          <div className="flex items-center p-2 bg-yellow-50 rounded border border-yellow-200">
-                            <AlertCircle className="h-4 w-4 text-yellow-600 mr-2" />
-                            <span className="text-sm">Approaching 75% of budget usage</span>
-                          </div>
-                        </div>
-                      </div>
+                      {(() => {
+                        // Calculate expense categories from transactions
+                        const categoryTotals: Record<string, number> = {};
+                        
+                        transactions.forEach((transaction: any) => {
+                          const category = transaction.category || 'Uncategorized';
+                          const amount = Number(transaction.amount) || 0;
+                          
+                          if (!categoryTotals[category]) {
+                            categoryTotals[category] = 0;
+                          }
+                          categoryTotals[category] += amount;
+                        });
+                        
+                        // Sort categories by amount and get top 5
+                        const sortedCategories = Object.entries(categoryTotals)
+                          .sort((a, b) => b[1] - a[1])
+                          .slice(0, 5)
+                          .map(([category, amount]) => ({ category, amount }));
+                        
+                        // Calculate total amount for percentage calculation
+                        const totalAmount = Object.values(categoryTotals).reduce((sum, amount) => sum + amount, 0);
+                        
+                        return sortedCategories.map((item, index) => {
+                          const percentage = totalAmount > 0 ? Math.round((item.amount / totalAmount) * 100) : 0;
+                          
+                          return (
+                            <div key={index} className="space-y-1">
+                              <div className="flex justify-between">
+                                <span className="text-sm font-medium">{item.category}</span>
+                                <span className="text-sm font-medium">KSh {item.amount.toLocaleString()}</span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div 
+                                  className="bg-primary h-2 rounded-full" 
+                                  style={{ width: `${percentage}%` }}
+                                ></div>
+                              </div>
+                            </div>
+                          );
+                        });
+                      })()}
                     </div>
                   </CardContent>
                 </Card>
@@ -1192,7 +1136,7 @@ export default function ComprehensiveManagerDashboard({
                     <div className="space-y-4">
                       {teamMembers?.slice(0, 5).map((member: any, index: number) => {
                         const memberTransactions = transactions.filter((t: any) => t.user_id === member.id);
-                        const totalAmount = memberTransactions.reduce((sum: number, t: any) => sum + (t.amount || 0), 0);
+                        const totalAmount = memberTransactions.reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0);
                         
                         return (
                           <div key={member.id} className="flex items-center justify-between">
@@ -1224,37 +1168,93 @@ export default function ComprehensiveManagerDashboard({
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex justify-between">
-                        <span>Expense Reports</span>
-                        <span className="font-medium">95%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-green-500 h-2 rounded-full" style={{ width: "95%" }}></div>
-                      </div>
-                      
-                      <div className="flex justify-between">
-                        <span>Receipt Attachments</span>
-                        <span className="font-medium">87%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-blue-500 h-2 rounded-full" style={{ width: "87%" }}></div>
-                      </div>
-                      
-                      <div className="flex justify-between">
-                        <span>Policy Violations</span>
-                        <span className="font-medium">5%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-red-500 h-2 rounded-full" style={{ width: "5%" }}></div>
-                      </div>
-                      
-                      <div className="flex justify-between">
-                        <span>On-time Submissions</span>
-                        <span className="font-medium">92%</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-yellow-500 h-2 rounded-full" style={{ width: "92%" }}></div>
-                      </div>
+                      {(() => {
+                        // Calculate compliance metrics from transactions
+                        const totalTransactions = transactions.length;
+                        if (totalTransactions === 0) {
+                          return (
+                            <>
+                              <div className="flex justify-between">
+                                <span>Expense Reports</span>
+                                <span className="font-medium">0%</span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div className="bg-green-500 h-2 rounded-full" style={{ width: "0%" }}></div>
+                              </div>
+                              
+                              <div className="flex justify-between">
+                                <span>Receipt Attachments</span>
+                                <span className="font-medium">0%</span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div className="bg-blue-500 h-2 rounded-full" style={{ width: "0%" }}></div>
+                              </div>
+                              
+                              <div className="flex justify-between">
+                                <span>Policy Violations</span>
+                                <span className="font-medium">0%</span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div className="bg-red-500 h-2 rounded-full" style={{ width: "0%" }}></div>
+                              </div>
+                              
+                              <div className="flex justify-between">
+                                <span>On-time Submissions</span>
+                                <span className="font-medium">0%</span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div className="bg-yellow-500 h-2 rounded-full" style={{ width: "0%" }}></div>
+                              </div>
+                            </>
+                          );
+                        }
+                        
+                        // Calculate compliance metrics
+                        const hasReceipts = transactions.filter((t: any) => t.receipt_image).length;
+                        const approvedTransactions = transactions.filter((t: any) => t.status === 'approved' || t.status === 'completed').length;
+                        const violations = transactions.filter((t: any) => t.status === 'rejected').length;
+                        
+                        const expenseReportRate = totalTransactions > 0 ? Math.round((approvedTransactions / totalTransactions) * 100) : 0;
+                        const receiptAttachmentRate = totalTransactions > 0 ? Math.round((hasReceipts / totalTransactions) * 100) : 0;
+                        const violationRate = totalTransactions > 0 ? Math.round((violations / totalTransactions) * 100) : 0;
+                        const onTimeRate = 100 - violationRate; // Simplified calculation
+                        
+                        return (
+                          <>
+                            <div className="flex justify-between">
+                              <span>Expense Reports</span>
+                              <span className="font-medium">{expenseReportRate}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="bg-green-500 h-2 rounded-full" style={{ width: `${expenseReportRate}%` }}></div>
+                            </div>
+                            
+                            <div className="flex justify-between">
+                              <span>Receipt Attachments</span>
+                              <span className="font-medium">{receiptAttachmentRate}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${receiptAttachmentRate}%` }}></div>
+                            </div>
+                            
+                            <div className="flex justify-between">
+                              <span>Policy Violations</span>
+                              <span className="font-medium">{violationRate}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="bg-red-500 h-2 rounded-full" style={{ width: `${violationRate}%` }}></div>
+                            </div>
+                            
+                            <div className="flex justify-between">
+                              <span>On-time Submissions</span>
+                              <span className="font-medium">{onTimeRate}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div className="bg-yellow-500 h-2 rounded-full" style={{ width: `${onTimeRate}%` }}></div>
+                            </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   </CardContent>
                 </Card>
@@ -1289,7 +1289,12 @@ export default function ComprehensiveManagerDashboard({
                   </CardHeader>
                   <CardContent>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Last generated: May 15, 2024</span>
+                      <span className="text-sm text-muted-foreground">
+                        {(() => {
+                          const now = new Date();
+                          return `Generated: ${now.toLocaleDateString()}`
+                        })()}
+                      </span>
                       <Button size="sm">Generate Report</Button>
                     </div>
                   </CardContent>
@@ -1305,7 +1310,12 @@ export default function ComprehensiveManagerDashboard({
                   </CardHeader>
                   <CardContent>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Last updated: Today</span>
+                      <span className="text-sm text-muted-foreground">
+                        {(() => {
+                          const now = new Date();
+                          return `Updated: ${now.toLocaleDateString()}`
+                        })()}
+                      </span>
                       <Button size="sm">Generate Report</Button>
                     </div>
                   </CardContent>
@@ -1321,7 +1331,12 @@ export default function ComprehensiveManagerDashboard({
                   </CardHeader>
                   <CardContent>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Last updated: Yesterday</span>
+                      <span className="text-sm text-muted-foreground">
+                        {(() => {
+                          const now = new Date();
+                          return `Updated: ${now.toLocaleDateString()}`
+                        })()}
+                      </span>
                       <Button size="sm">Generate Report</Button>
                     </div>
                   </CardContent>
@@ -1337,7 +1352,12 @@ export default function ComprehensiveManagerDashboard({
                   </CardHeader>
                   <CardContent>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Last updated: May 12, 2024</span>
+                      <span className="text-sm text-muted-foreground">
+                        {(() => {
+                          const now = new Date();
+                          return `Updated: ${now.toLocaleDateString()}`
+                        })()}
+                      </span>
                       <Button size="sm">Generate Report</Button>
                     </div>
                   </CardContent>
@@ -1353,7 +1373,12 @@ export default function ComprehensiveManagerDashboard({
                   </CardHeader>
                   <CardContent>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Last updated: May 10, 2024</span>
+                      <span className="text-sm text-muted-foreground">
+                        {(() => {
+                          const now = new Date();
+                          return `Updated: ${now.toLocaleDateString()}`
+                        })()}
+                      </span>
                       <Button size="sm">Generate Report</Button>
                     </div>
                   </CardContent>
@@ -1369,7 +1394,12 @@ export default function ComprehensiveManagerDashboard({
                   </CardHeader>
                   <CardContent>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Last updated: May 8, 2024</span>
+                      <span className="text-sm text-muted-foreground">
+                        {(() => {
+                          const now = new Date();
+                          return `Updated: ${now.toLocaleDateString()}`
+                        })()}
+                      </span>
                       <Button size="sm">Generate Report</Button>
                     </div>
                   </CardContent>
