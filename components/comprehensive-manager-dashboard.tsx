@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
 import dynamic from "next/dynamic";
@@ -49,7 +50,8 @@ import {
   AlertCircle,
   LogOut,
   Phone,
-  MapPin
+  MapPin,
+  Send
 } from "lucide-react";
 
 // Dynamically import recharts components to reduce bundle size
@@ -967,6 +969,82 @@ export default function ComprehensiveManagerDashboard({
                   )}
                 </CardContent>
               </Card>
+              
+              {/* Approval Delegation Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Approval Delegation</CardTitle>
+                  <CardDescription>Delegate your approval authority when unavailable</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-2 block">Delegate To</label>
+                        <Select>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select team member" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {teamMembers
+                              .filter((member: any) => member.id !== user.id)
+                              .map((member: any) => (
+                                <SelectItem key={member.id} value={member.id}>
+                                  {member.full_name}
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div>
+                        <label className="text-sm font-medium text-foreground mb-2 block">Delegation Period</label>
+                        <div className="flex gap-2">
+                          <Input 
+                            type="date" 
+                            placeholder="Start date" 
+                          />
+                          <Input 
+                            type="date" 
+                            placeholder="End date" 
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-2 block">Reason for Delegation</label>
+                      <Input placeholder="Brief explanation for delegation..." />
+                    </div>
+                    
+                    <Button className="w-full sm:w-auto">
+                      <UserPlusIcon className="mr-2 h-4 w-4" />
+                      Set Delegation
+                    </Button>
+                    
+                    {/* Current Delegations */}
+                    <div className="mt-6">
+                      <h3 className="text-lg font-medium mb-3">Current Delegations</h3>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <p className="font-medium">John Doe</p>
+                            <p className="text-sm text-muted-foreground">Jan 15, 2024 - Jan 22, 2024</p>
+                          </div>
+                          <Badge variant="secondary">Active</Badge>
+                        </div>
+                        <div className="flex items-center justify-between p-3 border rounded-lg opacity-70">
+                          <div>
+                            <p className="font-medium">Jane Smith</p>
+                            <p className="text-sm text-muted-foreground">Dec 20, 2023 - Dec 27, 2023</p>
+                          </div>
+                          <Badge variant="outline">Expired</Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
 
@@ -1062,6 +1140,46 @@ export default function ComprehensiveManagerDashboard({
                           </div>
                         </div>
                       ))}
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Budget Monitoring</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex justify-between">
+                        <span>Monthly Budget</span>
+                        <span className="font-medium">KSh 500,000</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-3">
+                        <div className="bg-blue-500 h-3 rounded-full" style={{ width: "65%" }}></div>
+                      </div>
+                      
+                      <div className="flex justify-between">
+                        <span>Spent This Month</span>
+                        <span className="font-medium">KSh 325,000</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-3">
+                        <div className="bg-green-500 h-3 rounded-full" style={{ width: "72%" }}></div>
+                      </div>
+                      
+                      <div className="flex justify-between">
+                        <span>Remaining</span>
+                        <span className="font-medium">KSh 175,000</span>
+                      </div>
+                      
+                      <div className="pt-4">
+                        <h4 className="font-medium mb-2">Budget Alerts</h4>
+                        <div className="space-y-2">
+                          <div className="flex items-center p-2 bg-yellow-50 rounded border border-yellow-200">
+                            <AlertCircle className="h-4 w-4 text-yellow-600 mr-2" />
+                            <span className="text-sm">Approaching 75% of budget usage</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -1253,6 +1371,167 @@ export default function ComprehensiveManagerDashboard({
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">Last updated: May 8, 2024</span>
                       <Button size="sm">Generate Report</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+          
+          {/* Communication Tools Tab */}
+          {activeTab === "communication" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row justify-between gap-4">
+                <h2 className="text-xl font-bold text-foreground">Communication Tools</h2>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Send Message to Team</CardTitle>
+                  <CardDescription>Send notifications or requests to your team members</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-2 block">Recipients</label>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select team members" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Team Members</SelectItem>
+                          <SelectItem value="pending">Members with Pending Expenses</SelectItem>
+                          {teamMembers?.map((member: any) => (
+                            <SelectItem key={member.id} value={member.id}>
+                              {member.full_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-2 block">Subject</label>
+                      <Input placeholder="Enter message subject..." />
+                    </div>
+                    
+                    <div>
+                      <label className="text-sm font-medium text-foreground mb-2 block">Message</label>
+                      <Textarea 
+                        placeholder="Type your message here..." 
+                        className="min-h-[120px]"
+                      />
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button>
+                        <Send className="mr-2 h-4 w-4" />
+                        Send Message
+                      </Button>
+                      <Button variant="outline">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Schedule
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Recent Communications</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {[
+                        { 
+                          id: 1, 
+                          sender: "System", 
+                          subject: "Pending Approvals Reminder", 
+                          time: "2 hours ago",
+                          read: false
+                        },
+                        { 
+                          id: 2, 
+                          sender: "Jane Smith", 
+                          subject: "Expense Clarification Needed", 
+                          time: "Yesterday",
+                          read: true
+                        },
+                        { 
+                          id: 3, 
+                          sender: "John Doe", 
+                          subject: "Out of Office - Delegate Approval", 
+                          time: "May 12, 2024",
+                          read: true
+                        }
+                      ].map((message) => (
+                        <div 
+                          key={message.id} 
+                          className={`p-3 rounded-lg border ${!message.read ? 'bg-primary/5 border-primary' : 'hover:bg-muted'}`}
+                        >
+                          <div className="flex justify-between">
+                            <div className="font-medium">{message.subject}</div>
+                            <div className="text-sm text-muted-foreground">{message.time}</div>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <div>From: {message.sender}</div>
+                            {!message.read && (
+                              <Badge variant="secondary">New</Badge>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Urgent Approvals</CardTitle>
+                    <CardDescription>Transactions requiring immediate attention</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {transactions
+                        .filter((t: any) => t.status === 'pending')
+                        .slice(0, 3)
+                        .map((transaction: any) => (
+                          <div key={transaction.id} className="p-3 border rounded-lg">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <h4 className="font-medium">{transaction.description}</h4>
+                                <p className="text-sm text-muted-foreground">
+                                  {transaction.user_profiles?.full_name || 'User'} • KSh {transaction.amount?.toLocaleString()}
+                                </p>
+                              </div>
+                              <Badge variant="destructive">Urgent</Badge>
+                            </div>
+                            <div className="flex gap-2 mt-3">
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleApproveTransaction(transaction.id)}
+                              >
+                                Approve
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline"
+                                onClick={() => handleRejectTransaction(transaction.id)}
+                              >
+                                Reject
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      
+                      {transactions.filter((t: any) => t.status === 'pending').length === 0 && (
+                        <div className="text-center py-4 text-muted-foreground">
+                          <p>No urgent approvals required</p>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
