@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { createClient } from "@/lib/supabase/client"
 import dynamic from "next/dynamic"
 import { Suspense } from "react"
+import Link from "next/link"
 import { signOut, toggleUserStatus, addUser, updateUser } from "@/lib/actions"
 import {
   DropdownMenu,
@@ -19,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { CreateUserModal } from "@/components/create-user-modal"
 import {
   Sheet,
@@ -29,6 +31,13 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { 
+  UserPlus as UserPlusIcon,
+  Shield as ShieldIcon,
+  Edit as EditIcon,
+  CheckCircle as CheckCircleIcon,
+  XCircle as XCircleIcon
+} from "lucide-react"
+import {
   Table,
   TableBody,
   TableCell,
@@ -36,13 +45,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { 
-  UserPlus as UserPlusIcon,
-  Shield as ShieldIcon,
-  Edit as EditIcon,
-  CheckCircle as CheckCircleIcon,
-  XCircle as XCircleIcon
-} from "lucide-react"
+
+// Import the new responsive sidebar
+import ResponsiveSidebar from "@/components/responsive-sidebar"
 
 // Dynamically import icons to reduce bundle size
 const Activity = dynamic(() => import("lucide-react").then(mod => mod.Activity))
@@ -116,6 +121,64 @@ export default function ComprehensiveAdminDashboard({
 
   const supabase = createClient()
 
+  // Define navigation items for the sidebar
+  const navItems = [
+    { 
+      href: "#overview", 
+      title: "Overview", 
+      icon: (
+        <Suspense fallback={<IconFallback />}>
+          <Activity className="mr-2 h-4 w-4" />
+        </Suspense>
+      ) 
+    },
+    { 
+      href: "#transactions", 
+      title: "Transactions", 
+      icon: (
+        <Suspense fallback={<IconFallback />}>
+          <DollarSign className="mr-2 h-4 w-4" />
+        </Suspense>
+      ) 
+    },
+    { 
+      href: "#users", 
+      title: "User Management", 
+      icon: (
+        <Suspense fallback={<IconFallback />}>
+          <Users className="mr-2 h-4 w-4" />
+        </Suspense>
+      ) 
+    },
+    { 
+      href: "#disbursements", 
+      title: "M-Pesa Disbursements", 
+      icon: (
+        <Suspense fallback={<IconFallback />}>
+          <Phone className="mr-2 h-4 w-4" />
+        </Suspense>
+      ) 
+    },
+    { 
+      href: "#analytics", 
+      title: "Advanced Analytics", 
+      icon: (
+        <Suspense fallback={<IconFallback />}>
+          <TrendingUp className="mr-2 h-4 w-4" />
+        </Suspense>
+      ) 
+    },
+    { 
+      href: "#system", 
+      title: "System Configuration", 
+      icon: (
+        <Suspense fallback={<IconFallback />}>
+          <Settings className="mr-2 h-4 w-4" />
+        </Suspense>
+      ) 
+    },
+  ];
+
   const enhancedStats = {
     totalTransactions: transactions.length,
     totalAmount: systemStats?.totalAmount || 0,
@@ -188,131 +251,12 @@ export default function ComprehensiveAdminDashboard({
   }
 
   return (
-    <div className="flex h-screen bg-background">
-      <div className="w-64 bg-card border-r border-border">
-        <div className="p-6">
-          <h2 className="text-xl font-bold text-primary">Easy Net Solutions</h2>
-          <p className="text-sm text-muted-foreground">Admin Portal</p>
-        </div>
-        <nav className="px-4 space-y-2">
-          <Button
-            variant={activeTab === "overview" ? "default" : "ghost"}
-            className="w-full justify-start"
-            onClick={() => setActiveTab("overview")}
-          >
-            <Suspense fallback={<IconFallback />}>
-              <Activity className="mr-2 h-4 w-4" />
-            </Suspense>
-            Overview
-          </Button>
-          <Button
-            variant={activeTab === "transactions" ? "default" : "ghost"}
-            className="w-full justify-start"
-            onClick={() => setActiveTab("transactions")}
-          >
-            <Suspense fallback={<IconFallback />}>
-              <DollarSign className="mr-2 h-4 w-4" />
-            </Suspense>
-            Transactions
-          </Button>
-          <Button
-            variant={activeTab === "users" ? "default" : "ghost"}
-            className="w-full justify-start"
-            onClick={() => setActiveTab("users")}
-          >
-            <Suspense fallback={<IconFallback />}>
-              <Users className="mr-2 h-4 w-4" />
-            </Suspense>
-            User Management
-          </Button>
-          <Button
-            variant={activeTab === "disbursements" ? "default" : "ghost"}
-            className="w-full justify-start"
-            onClick={() => setActiveTab("disbursements")}
-          >
-            <Suspense fallback={<IconFallback />}>
-              <Phone className="mr-2 h-4 w-4" />
-            </Suspense>
-            M-Pesa Disbursements
-          </Button>
-          <Button
-            variant={activeTab === "analytics" ? "default" : "ghost"}
-            className="w-full justify-start"
-            onClick={() => setActiveTab("analytics")}
-          >
-            <Suspense fallback={<IconFallback />}>
-              <TrendingUp className="mr-2 h-4 w-4" />
-            </Suspense>
-            Advanced Analytics
-          </Button>
-          <Button
-            variant={activeTab === "system" ? "default" : "ghost"}
-            className="w-full justify-start"
-            onClick={() => setActiveTab("system")}
-          >
-            <Suspense fallback={<IconFallback />}>
-              <Settings className="mr-2 h-4 w-4" />
-            </Suspense>
-            System Configuration
-          </Button>
-        </nav>
-
-        {/* User Profile Section at Bottom */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-card">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <div className="flex items-center space-x-3 cursor-pointer">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-primary font-semibold">
-                    {profile.full_name?.charAt(0)?.toUpperCase() || 'U'}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{profile.full_name}</p>
-                  <p className="text-xs text-muted-foreground capitalize">{profile.role}</p>
-                </div>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Suspense fallback={<IconFallback />}>
-                    <Settings className="h-4 w-4" />
-                  </Suspense>
-                </Button>
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-primary font-semibold">
-                    {profile.full_name?.charAt(0)?.toUpperCase() || 'U'}
-                  </span>
-                </div>
-                <div>
-                  <p className="font-medium">{profile.full_name}</p>
-                  <p className="text-sm text-muted-foreground capitalize">{profile.role}</p>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex items-center space-x-2 cursor-pointer">
-                <Suspense fallback={<IconFallback />}>
-                  <Settings className="h-4 w-4" />
-                </Suspense>
-                <span>Settings</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <form action={signOut}>
-                  <button type="submit" className="flex items-center space-x-2 w-full cursor-pointer">
-                    <Suspense fallback={<IconFallback />}>
-                      <LogOut className="h-4 w-4" />
-                    </Suspense>
-                    <span>Sign Out</span>
-                  </button>
-                </form>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-
+    <ResponsiveSidebar 
+      user={profile} 
+      navItems={navItems} 
+      sidebarTitle="Easy Net Solutions"
+      sidebarSubtitle="Admin Portal"
+    >
       <div className="flex-1 overflow-auto">
         <div className="p-6">
           {/* Remove the .000000000 class that was causing extra zeros */}
@@ -323,17 +267,18 @@ export default function ComprehensiveAdminDashboard({
               <p className="text-muted-foreground">Welcome back, {profile.full_name}</p>
             </div>
             <div className="flex gap-2">
+              <ThemeToggle />
               <Button variant="outline" size="sm">
                 <Suspense fallback={<IconFallback />}>
                   <Download className="mr-2 h-4 w-4" />
                 </Suspense>
                 Export Data
               </Button>
-              <Button size="sm">
-                <Suspense fallback={<IconFallback />}>
+              <Button size="sm" asChild>
+                <Link href="/dashboard/settings">
                   <Settings className="mr-2 h-4 w-4" />
-                </Suspense>
-                Settings
+                  Settings
+                </Link>
               </Button>
             </div>
           </div>
@@ -834,6 +779,7 @@ export default function ComprehensiveAdminDashboard({
         </div>
       </div>
 
+      {/* Transaction Details Dialog */}
       {selectedTransaction && (
         <Dialog open={!!selectedTransaction} onOpenChange={() => setSelectedTransaction(null)}>
           <DialogContent className="max-w-2xl">
@@ -887,6 +833,6 @@ export default function ComprehensiveAdminDashboard({
           window.location.reload()
         }}
       />
-    </div>
+    </ResponsiveSidebar>
   )
 }

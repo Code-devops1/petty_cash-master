@@ -111,12 +111,12 @@ export default async function DashboardPage() {
     )
   }
 
-  // For manager users, prepare department-specific data
+  // For manager users, prepare data for all transactions (not just department-specific)
   if (
     userProfile?.role === "manager" ||
     userProfile?.role === "MANAGER"
   ) {
-    // Get department transactions for manager view
+    // Get all transactions for manager view (since there's only one manager)
     let departmentTransactions = [];
     let departmentStats = {
       totalAmount: 0,
@@ -126,31 +126,46 @@ export default async function DashboardPage() {
     let teamMembers = [];
     
     try {
-      // Get transactions for users in the same department as the manager
-      // First, get the manager's department
-      const { data: managerProfile } = await supabase
-        .from("users")
-        .select("department")
-        .eq("id", user.id)
-        .single();
-
-      // Get transactions for users in the same department
-      const { data: transactionsData } = await supabase
+      // Get all transactions (fetching separately to avoid join issues)
+      const { data: transactionsData, error: transactionsError } = await supabase
         .from("transactions")
-        .select(`
-          *,
-          user_profiles:users!user_id (full_name, email, phone_number, department)
-        `)
-        .eq("users.department", managerProfile?.department || "")
+        .select("*")
         .order("created_at", { ascending: false })
         .limit(100)
       
-      departmentTransactions = transactionsData || []
+      if (transactionsError) {
+        console.error("Error fetching transactions:", transactionsError);
+      }
+      
+      // Add user profile data separately if needed
+      let transactionsWithUsers = transactionsData || [];
+      
+      if (transactionsWithUsers.length > 0) {
+        // Add user profile data to each transaction
+        for (let i = 0; i < transactionsWithUsers.length; i++) {
+          const transaction = transactionsWithUsers[i];
+          const { data: userData } = await supabase
+            .from("users")
+            .select("full_name, email, phone_number, department")
+            .eq("id", transaction.user_id)
+            .single();
+          
+          if (userData) {
+            transaction.user_profiles = userData;
+          }
+        }
+      }
+      
+      departmentTransactions = transactionsWithUsers;
       
       // Get department-specific statistics
       const totalAmount = departmentTransactions.reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0)
-      const pendingCount = departmentTransactions.filter((t: any) => t.status === "pending").length
-      const completedCount = departmentTransactions.filter((t: any) => t.status === "completed").length
+      const pendingCount = departmentTransactions.filter((t: any) => 
+        t.status?.toLowerCase() === "pending" || t.status?.toLowerCase() === "PENDING"
+      ).length
+      const completedCount = departmentTransactions.filter((t: any) => 
+        t.status?.toLowerCase() === "completed" || t.status?.toLowerCase() === "COMPLETED"
+      ).length
       
       departmentStats = {
         totalAmount,
@@ -158,11 +173,10 @@ export default async function DashboardPage() {
         completedCount
       }
       
-      // Get team members (users with the same department as the manager)
+      // Get all users (since there's only one manager)
       const { data: usersData, error: usersError } = await supabase
         .from("users")
         .select("*")
-        .eq("department", managerProfile?.department || "")
         .order("created_at", { ascending: false })
       
       if (usersError) {

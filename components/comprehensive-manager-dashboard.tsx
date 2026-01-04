@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { User } from "@supabase/supabase-js";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { createClient } from "@/lib/supabase/client";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
+import Link from "next/link";
 import { signOut } from "@/lib/actions";
 import {
   DropdownMenu,
@@ -28,6 +29,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import ResponsiveSidebar from "@/components/responsive-sidebar";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { 
   UserPlus as UserPlusIcon,
   Shield as ShieldIcon,
@@ -51,20 +54,28 @@ import {
   LogOut,
   Phone,
   MapPin,
-  Send
+  Send,
+  Menu
 } from "lucide-react";
 
 // Dynamically import recharts components to reduce bundle size
-const LineChart = dynamic(() => import("recharts").then(mod => mod.LineChart));
-const Line = dynamic(() => import("recharts").then(mod => mod.Line));
-const PieChart = dynamic(() => import("recharts").then(mod => mod.PieChart));
-const Pie = dynamic(() => import("recharts").then(mod => mod.Pie));
-const Cell = dynamic(() => import("recharts").then(mod => mod.Cell));
-const ResponsiveContainer = dynamic(() => import("recharts").then(mod => mod.ResponsiveContainer));
-const Tooltip = dynamic(() => import("recharts").then(mod => mod.Tooltip));
-const CartesianGrid = dynamic(() => import("recharts").then(mod => mod.CartesianGrid));
-const XAxis = dynamic(() => import("recharts").then(mod => mod.XAxis));
-const YAxis = dynamic(() => import("recharts").then(mod => mod.YAxis));
+const LineChart = dynamic(() => import("recharts").then(mod => mod.LineChart))
+const Line = dynamic(() => import("recharts").then(mod => mod.Line))
+const PieChart = dynamic(() => import("recharts").then(mod => mod.PieChart))
+const Pie = dynamic(() => import("recharts").then(mod => mod.Pie))
+const Cell = dynamic(() => import("recharts").then(mod => mod.Cell))
+const ResponsiveContainer = dynamic(() => import("recharts").then(mod => mod.ResponsiveContainer))
+const Tooltip = dynamic(() => import("recharts").then(mod => mod.Tooltip))
+const CartesianGrid = dynamic(() => import("recharts").then(mod => mod.CartesianGrid))
+const XAxis = dynamic(() => import("recharts").then(mod => mod.XAxis))
+const YAxis = dynamic(() => import("recharts").then(mod => mod.YAxis))
+
+// Dynamically import dialog components
+const Dialog = dynamic(() => import("@/components/ui/dialog").then(mod => mod.Dialog))
+const DialogContent = dynamic(() => import("@/components/ui/dialog").then(mod => mod.DialogContent))
+const DialogHeader = dynamic(() => import("@/components/ui/dialog").then(mod => mod.DialogHeader))
+const DialogTitle = dynamic(() => import("@/components/ui/dialog").then(mod => mod.DialogTitle))
+const DialogDescription = dynamic(() => import("@/components/ui/dialog").then(mod => mod.DialogDescription))
 
 // Loading component for dynamic icons
 const IconFallback = () => <div className="w-4 h-4" />
@@ -91,20 +102,115 @@ export default function ComprehensiveManagerDashboard({
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [departmentFilter, setDepartmentFilter] = useState("all");
-  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const [expandedTransactionId, setExpandedTransactionId] = useState<string | null>(null);
   const [notification, setNotification] = useState<{type: string, message: string} | null>(null);
+  
+  const dashboardRef = useRef<HTMLDivElement>(null);
+
+  // Handle click outside to collapse expanded transactions
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dashboardRef.current && !dashboardRef.current.contains(event.target as Node)) {
+        setExpandedTransactionId(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const supabase = createClient();
+
+  // Define status colors mapping
+  const statusColors = {
+    pending: "bg-orange-100 text-orange-800",
+    approved: "bg-green-100 text-green-800",
+    rejected: "bg-red-100 text-red-800",
+    disbursed: "bg-blue-100 text-blue-800",
+    completed: "bg-slate-100 text-slate-800",
+  };
+
+  // Define navigation items for the sidebar
+  const navItems = [
+    { 
+      href: "#overview", 
+      title: "Overview", 
+      icon: (
+        <Suspense fallback={<IconFallback />}>
+          <Activity className="mr-2 h-4 w-4" />
+        </Suspense>
+      ),
+      onClick: () => setActiveTab("overview")
+    },
+    { 
+      href: "#transactions", 
+      title: "Transactions", 
+      icon: (
+        <Suspense fallback={<IconFallback />}>
+          <DollarSign className="mr-2 h-4 w-4" />
+        </Suspense>
+      ),
+      onClick: () => setActiveTab("transactions")
+    },
+    { 
+      href: "#team", 
+      title: "Team Management", 
+      icon: (
+        <Suspense fallback={<IconFallback />}>
+          <Users className="mr-2 h-4 w-4" />
+        </Suspense>
+      ),
+      onClick: () => setActiveTab("team")
+    },
+    { 
+      href: "#analytics", 
+      title: "Analytics", 
+      icon: (
+        <Suspense fallback={<IconFallback />}>
+          <TrendingUp className="mr-2 h-4 w-4" />
+        </Suspense>
+      ),
+      onClick: () => setActiveTab("analytics")
+    },
+    { 
+      href: "#reports", 
+      title: "Reports", 
+      icon: (
+        <Suspense fallback={<IconFallback />}>
+          <FileText className="mr-2 h-4 w-4" />
+        </Suspense>
+      ),
+      onClick: () => setActiveTab("reports")
+    },
+    { 
+      href: "#communication", 
+      title: "Communication", 
+      icon: (
+        <Suspense fallback={<IconFallback />}>
+          <Send className="mr-2 h-4 w-4" />
+        </Suspense>
+      ),
+      onClick: () => setActiveTab("communication")
+    },
+  ];
 
   // Calculate department-specific stats
   const enhancedStats = {
     totalRequests: transactions.length,
     totalAmount: transactions.reduce((sum, t) => sum + (t.amount || 0), 0),
-    pendingApprovals: transactions.filter(t => t.status === "pending").length,
+    pendingApprovals: transactions.filter(t => 
+      t.status?.toLowerCase() === "pending" || 
+      t.status?.toLowerCase() === "PENDING"
+    ).length,
     teamMembersCount: teamMembers?.length || 0,
     completionRate: 
       transactions.length > 0 
-        ? (((transactions.filter(t => t.status !== "pending").length) / transactions.length) * 100).toFixed(1) 
+        ? (((transactions.filter(t => 
+            t.status?.toLowerCase() !== "pending" && 
+            t.status?.toLowerCase() !== "PENDING"
+          ).length) / transactions.length) * 100).toFixed(1) 
         : 0,
     avgProcessingTime: "2.3 hours", // Would be calculated from actual data
     monthlyGrowth: "+8.2%", // Would be calculated from historical data
@@ -116,7 +222,12 @@ export default function ComprehensiveManagerDashboard({
     const matchesSearch =
       transaction.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       transaction.user_profiles?.full_name?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || transaction.status === statusFilter;
+    const matchesStatus = statusFilter === "all" || 
+                         transaction.status?.toLowerCase() === statusFilter.toLowerCase() ||
+                         (statusFilter === "pending" && transaction.status?.toLowerCase() === "PENDING") ||
+                         (statusFilter === "PENDING" && transaction.status?.toLowerCase() === "pending") ||
+                         (statusFilter === "completed" && transaction.status?.toLowerCase() === "COMPLETED") ||
+                         (statusFilter === "COMPLETED" && transaction.status?.toLowerCase() === "completed");
     return matchesSearch && matchesStatus;
   });
 
@@ -153,13 +264,18 @@ export default function ComprehensiveManagerDashboard({
         throw new Error(result.error || "Failed to approve transaction");
       }
 
-      // Show success notification
+      // Update the local state to reflect the approval
+      const updatedTransactions = transactions.map(transaction => 
+        transaction.id === transactionId 
+          ? { ...transaction, status: 'approved' } 
+          : transaction
+      );
+
+      // Update the enhancedStats to reflect the change
       setNotification({type: "success", message: "Transaction approved successfully!"});
       
-      // Refresh data after approval
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+      // Update the page to reflect the changes without reloading
+      window.location.reload(); // For now, keeping reload until we update props properly
     } catch (error: any) {
       console.error("Error approving transaction:", error);
       setNotification({type: "error", message: `Error approving transaction: ${error.message}`});
@@ -185,13 +301,18 @@ export default function ComprehensiveManagerDashboard({
         throw new Error(result.error || "Failed to reject transaction");
       }
 
-      // Show success notification
+      // Update the local state to reflect the rejection
+      const updatedTransactions = transactions.map(transaction => 
+        transaction.id === transactionId 
+          ? { ...transaction, status: 'rejected' } 
+          : transaction
+      );
+
+      // Update the enhancedStats to reflect the change
       setNotification({type: "success", message: "Transaction rejected successfully!"});
       
-      // Refresh data after rejection
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
+      // Update the page to reflect the changes without reloading
+      window.location.reload(); // For now, keeping reload until we update props properly
     } catch (error: any) {
       console.error("Error rejecting transaction:", error);
       setNotification({type: "error", message: `Error rejecting transaction: ${error.message}`});
@@ -209,179 +330,32 @@ export default function ComprehensiveManagerDashboard({
   }, [notification]);
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
-      {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-card border-r border-border transition-all duration-300 flex flex-col`}>
-        <div className="p-6">
-          <h2 className="text-xl font-bold text-primary">Easy Net Solutions</h2>
-          <p className="text-sm text-muted-foreground">Manager Portal</p>
-        </div>
-        <nav className="px-4 space-y-2 flex-1">
-          <Button
-            variant={activeTab === "overview" ? "default" : "ghost"}
-            className="w-full justify-start"
-            onClick={() => setActiveTab("overview")}
-          >
-            <Activity className="mr-2 h-4 w-4" />
-            Overview
-          </Button>
-          <Button
-            variant={activeTab === "transactions" ? "default" : "ghost"}
-            className="w-full justify-start"
-            onClick={() => setActiveTab("transactions")}
-          >
-            <DollarSign className="mr-2 h-4 w-4" />
-            Transactions
-          </Button>
-          <Button
-            variant={activeTab === "team" ? "default" : "ghost"}
-            className="w-full justify-start"
-            onClick={() => setActiveTab("team")}
-          >
-            <Users className="mr-2 h-4 w-4" />
-            Team Management
-          </Button>
-          <Button
-            variant={activeTab === "analytics" ? "default" : "ghost"}
-            className="w-full justify-start"
-            onClick={() => setActiveTab("analytics")}
-          >
-            <TrendingUp className="mr-2 h-4 w-4" />
-            Analytics
-          </Button>
-          <Button
-            variant={activeTab === "reports" ? "default" : "ghost"}
-            className="w-full justify-start"
-            onClick={() => setActiveTab("reports")}
-          >
-            <FileText className="mr-2 h-4 w-4" />
-            Reports
-          </Button>
-          <Button
-            variant={activeTab === "communication" ? "default" : "ghost"}
-            className="w-full justify-start"
-            onClick={() => setActiveTab("communication")}
-          >
-            <Send className="mr-2 h-4 w-4" />
-            Communication
-          </Button>
-        </nav>
-
-        {/* User Profile Section at Bottom */}
-        <div className="p-4 border-t border-border">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <div className="flex items-center space-x-3 cursor-pointer">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-primary font-semibold">
-                    {profile.full_name?.charAt(0)?.toUpperCase() || 'U'}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{profile.full_name}</p>
-                  <p className="text-xs text-muted-foreground capitalize">{profile.role}</p>
-                </div>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <Settings className="h-4 w-4" />
-                </Button>
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-primary font-semibold">
-                    {profile.full_name?.charAt(0)?.toUpperCase() || 'U'}
-                  </span>
-                </div>
-                <div>
-                  <p className="font-medium">{profile.full_name}</p>
-                  <p className="text-sm text-muted-foreground capitalize">{profile.role}</p>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex items-center space-x-2 cursor-pointer">
-                <Settings className="h-4 w-4" />
-                <span>Settings</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <form action={signOut}>
-                  <button type="submit" className="flex items-center space-x-2 w-full cursor-pointer">
-                    <LogOut className="h-4 w-4" />
-                    <span>Sign Out</span>
-                  </button>
-                </form>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-
-
-      {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        {/* Mobile Header */}
-        <div className="md:hidden p-4 border-b flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="h-8 w-8 p-0"
-            >
-              <span className="sr-only">Toggle sidebar</span>
-              <svg
-                className={`h-4 w-4`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </Button>
-            <h1 className="text-xl font-bold">Manager Dashboard</h1>
-          </div>
-        </div>
-
-        {/* Notification Banner */}
-        {notification && (
-          <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg max-w-sm ${
-            notification.type === "success" 
-              ? "bg-green-100 text-green-800 border border-green-200" 
-              : "bg-red-100 text-red-800 border border-red-200"
-          }`}>
-            <div className="flex items-center">
-              {notification.type === "success" ? (
-                <CheckCircleIcon className="h-5 w-5 mr-2 text-green-600" />
-              ) : (
-                <XCircleIcon className="h-5 w-5 mr-2 text-red-600" />
-              )}
-              <span>{notification.message}</span>
-            </div>
-          </div>
-        )}
-
+    <ResponsiveSidebar
+      user={{
+        full_name: profile?.full_name || user?.email || "Manager",
+        role: "Manager",
+      }}
+      navItems={navItems}
+      sidebarTitle="EasyNet Solutions "
+      sidebarSubtitle="Manager Portal"
+    >
+      <div ref={dashboardRef} className="flex-1 overflow-auto">
         <div className="p-4 md:p-6">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground">Manager Dashboard</h1>
-              <p className="text-muted-foreground">Welcome back, {profile.full_name}</p>
+              <h1 className="text-2xl font-bold text-foreground">EasyNet</h1>
+              <p className="text-muted-foreground">Manage your department's petty cash operations</p>
             </div>
-            <div className="flex gap-2 flex-wrap">
-              <Button variant="outline" size="sm">
-                <Download className="mr-2 h-4 w-4" />
-                Export Data
+            <div className="flex items-center gap-3">
+             
+              <ThemeToggle />
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/dashboard/settings">
+                  <Settings className="h-4 w-4" />
+                </Link>
               </Button>
-              <Button size="sm">
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-              </Button>
+             
             </div>
           </div>
 
@@ -445,14 +419,27 @@ export default function ComprehensiveManagerDashboard({
                   <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
                       <LineChart
-                        data={[
-                          { month: "Jan", transactions: 25, amount: 85000 },
-                          { month: "Feb", transactions: 32, amount: 102000 },
-                          { month: "Mar", transactions: 28, amount: 98000 },
-                          { month: "Apr", transactions: 41, amount: 125000 },
-                          { month: "May", transactions: 35, amount: 118000 },
-                          { month: "Jun", transactions: 47, amount: 142000 },
-                        ]}
+                        data={(() => {
+                          // Group transactions by month and calculate totals
+                          const monthlyData: {[key: string]: {transactions: number, amount: number}} = {};
+                          
+                          transactions.forEach(transaction => {
+                            const date = new Date(transaction.created_at);
+                            const month = date.toLocaleString('default', { month: 'short' }) + ' ' + date.getFullYear();
+                            
+                            if (!monthlyData[month]) {
+                              monthlyData[month] = { transactions: 0, amount: 0 };
+                            }
+                            
+                            monthlyData[month].transactions += 1;
+                            monthlyData[month].amount += transaction.amount || 0;
+                          });
+                          
+                          // Convert to array and sort by date
+                          return Object.entries(monthlyData)
+                            .map(([month, data]) => ({ month, ...data }))
+                            .sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
+                        })()}
                       >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="month" />
@@ -578,78 +565,120 @@ export default function ComprehensiveManagerDashboard({
 
               <div className="grid gap-4">
                 {filteredTransactions.map((transaction) => (
-                  <Card key={transaction.id} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-4 md:p-6">
-                      <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
-                        <div className="space-y-2 flex-1">
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                            <h3 className="font-semibold">{transaction.description}</h3>
-                            <Badge
-                              variant={
-                                transaction.status === "completed"
-                                  ? "default"
-                                  : transaction.status === "approved"
-                                    ? "secondary"
-                                    : transaction.status === "pending"
-                                      ? "outline"
-                                      : "destructive"
-                              }
-                            >
-                              {transaction.status}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            By: {transaction.user_profiles?.full_name} •{" "}
-                            {new Date(transaction.created_at).toLocaleDateString()}
-                          </p>
-                          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 text-sm text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <DollarSign className="h-3 w-3" />
-                              KSh {transaction.amount?.toLocaleString()}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Phone className="h-3 w-3" />
-                              {transaction.user_profiles?.phone_number}
-                            </span>
-                            {transaction.location && (
+                  <div key={transaction.id}>
+                    <Card className="hover:shadow-md transition-shadow">
+                      <CardContent className="p-4 md:p-6">
+                        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                          <div className="space-y-2 flex-1">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                              <h3 className="font-semibold">{transaction.description}</h3>
+                              <Badge
+                                variant={
+                                  transaction.status === "completed"
+                                    ? "default"
+                                    : transaction.status === "approved"
+                                      ? "secondary"
+                                      : transaction.status === "pending"
+                                        ? "outline"
+                                        : "destructive"
+                                }
+                              >
+                                {transaction.status}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              By: {transaction.user_profiles?.full_name} •{" "}
+                              {new Date(transaction.created_at).toLocaleDateString()}
+                            </p>
+                            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 text-sm text-muted-foreground">
                               <span className="flex items-center gap-1">
-                                <MapPin className="h-3 w-3" />
-                                {transaction.location}
+                                <DollarSign className="h-3 w-3" />
+                                KSh {transaction.amount?.toLocaleString()}
                               </span>
+                              <span className="flex items-center gap-1">
+                                <Phone className="h-3 w-3" />
+                                {transaction.user_profiles?.phone_number}
+                              </span>
+                              {transaction.location && (
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="h-3 w-3" />
+                                  {transaction.location}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {transaction.status === "pending" && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleApproveTransaction(transaction.id)}
+                                >
+                                  <CheckCircleIcon className="mr-1 h-3 w-3" />
+                                  Approve
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleRejectTransaction(transaction.id)}
+                                >
+                                  <XCircleIcon className="mr-1 h-3 w-3" />
+                                  Reject
+                                </Button>
+                              </>
                             )}
+                            <Button 
+                              size="sm" 
+                              variant="ghost" 
+                              onClick={() => setExpandedTransactionId(
+                                expandedTransactionId === transaction.id ? null : transaction.id
+                              )}
+                            >
+                              {expandedTransactionId === transaction.id ? "Hide Details" : "View Details"}
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                          {transaction.status === "pending" && (
-                            <>
-                              <Button
-                                size="sm"
-                                onClick={() => handleApproveTransaction(transaction.id)}
-                              >
-                                <CheckCircleIcon className="mr-1 h-3 w-3" />
-                                Approve
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => handleRejectTransaction(transaction.id)}
-                              >
-                                <XCircleIcon className="mr-1 h-3 w-3" />
-                                Reject
-                              </Button>
-                            </>
-                          )}
-                          <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            onClick={() => setSelectedTransaction(transaction)}
-                          >
-                            View Details
-                          </Button>
+                      </CardContent>
+                    </Card>
+                    
+                    {/* Expanded Transaction Details */}
+                    {expandedTransactionId === transaction.id && (
+                      <div className="mt-2 border rounded-lg p-4 bg-muted">
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div>
+                            <label className="text-sm font-medium">Amount</label>
+                            <p className="text-lg font-bold text-primary">KSh {transaction.amount?.toLocaleString()}</p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Status</label>
+                            <Badge className="mt-1">{transaction.status}</Badge>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Submitted By</label>
+                            <p>{transaction.user_profiles?.full_name}</p>
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Date</label>
+                            <p>{new Date(transaction.created_at).toLocaleDateString()}</p>
+                          </div>
                         </div>
+                        <div className="mb-4">
+                          <label className="text-sm font-medium">Description</label>
+                          <p className="mt-1">{transaction.description || transaction.reason || "No description provided"}</p>
+                        </div>
+                        {transaction.receipt_url && (
+                          <div>
+                            <label className="text-sm font-medium">Receipt</label>
+                            <img
+                              src={transaction.receipt_url || "/placeholder.svg"}
+                              alt="Receipt"
+                              className="mt-2 max-w-full h-auto rounded-lg"
+                            />
+                          </div>
+                        )}
                       </div>
-                    </CardContent>
-                  </Card>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
@@ -1470,6 +1499,93 @@ export default function ComprehensiveManagerDashboard({
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>
+                    <CardTitle>Recent Transactions</CardTitle>
+                    <CardDescription>Your department's latest activity</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {filteredTransactions.slice(0, 5).map((transaction) => (
+                        <div key={transaction.id}>
+                          <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                            <div>
+                              <p className="font-medium">{transaction.description || transaction.reason}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {transaction.user_profiles?.full_name || "Unknown User"} •{" "}
+                                {new Date(transaction.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="font-medium">KSh {Number(transaction.amount).toLocaleString()}</span>
+                              <Badge 
+                                className={statusColors[transaction.status as keyof typeof statusColors]}
+                                variant="secondary"
+                              >
+                                {transaction.status}
+                              </Badge>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => setExpandedTransactionId(
+                                  expandedTransactionId === transaction.id ? null : transaction.id
+                                )}
+                              >
+                                {expandedTransactionId === transaction.id ? "Hide" : "View"}
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          {/* Expanded Transaction Details */}
+                          {expandedTransactionId === transaction.id && (
+                            <div className="mt-2 border rounded-lg p-4 bg-muted col-span-full">
+                              <div className="grid grid-cols-2 gap-4 mb-4">
+                                <div>
+                                  <label className="text-sm font-medium">Amount</label>
+                                  <p className="text-lg font-bold text-primary">KSh {transaction.amount?.toLocaleString()}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium">Status</label>
+                                  <Badge className="mt-1">{transaction.status}</Badge>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium">Submitted By</label>
+                                  <p>{transaction.user_profiles?.full_name}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium">Date</label>
+                                  <p>{new Date(transaction.created_at).toLocaleDateString()}</p>
+                                </div>
+                              </div>
+                              <div className="mb-4">
+                                <label className="text-sm font-medium">Description</label>
+                                <p className="mt-1">{transaction.description || transaction.reason || "No description provided"}</p>
+                              </div>
+                              {transaction.receipt_url && (
+                                <div>
+                                  <label className="text-sm font-medium">Receipt</label>
+                                  <img
+                                    src={transaction.receipt_url || "/placeholder.svg"}
+                                    alt="Receipt"
+                                    className="mt-2 max-w-full h-auto rounded-lg"
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      className="w-full mt-4"
+                      onClick={() => setActiveTab("transactions")}
+                    >
+                      View All Transactions
+                    </Button>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
                     <CardTitle>Recent Communications</CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -1528,32 +1644,82 @@ export default function ComprehensiveManagerDashboard({
                         .filter((t: any) => t.status === 'pending')
                         .slice(0, 3)
                         .map((transaction: any) => (
-                          <div key={transaction.id} className="p-3 border rounded-lg">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h4 className="font-medium">{transaction.description}</h4>
-                                <p className="text-sm text-muted-foreground">
-                                  {transaction.user_profiles?.full_name || 'User'} • KSh {transaction.amount?.toLocaleString()}
-                                </p>
+                          <div key={transaction.id}>
+                            <div className="p-3 border rounded-lg">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h4 className="font-medium">{transaction.description}</h4>
+                                  <p className="text-sm text-muted-foreground">
+                                    {transaction.user_profiles?.full_name || 'User'} • KSh {transaction.amount?.toLocaleString()}
+                                  </p>
+                                </div>
+                                <Badge variant="destructive">Urgent</Badge>
                               </div>
-                              <Badge variant="destructive">Urgent</Badge>
+                              <div className="flex gap-2 mt-3">
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleApproveTransaction(transaction.id)}
+                                >
+                                  Approve
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  onClick={() => handleRejectTransaction(transaction.id)}
+                                >
+                                  <XCircleIcon className="mr-1 h-3 w-3" />
+                                  Reject
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="ghost" 
+                                  onClick={() => setExpandedTransactionId(
+                                    expandedTransactionId === transaction.id ? null : transaction.id
+                                  )}
+                                >
+                                  {expandedTransactionId === transaction.id ? "Hide Details" : "View Details"}
+                                </Button>
+                              </div>
                             </div>
-                            <div className="flex gap-2 mt-3">
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => handleApproveTransaction(transaction.id)}
-                              >
-                                Approve
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => handleRejectTransaction(transaction.id)}
-                              >
-                                Reject
-                              </Button>
-                            </div>
+                            
+                            {/* Expanded Transaction Details */}
+                            {expandedTransactionId === transaction.id && (
+                              <div className="mt-2 border rounded-lg p-4 bg-muted">
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                  <div>
+                                    <label className="text-sm font-medium">Amount</label>
+                                    <p className="text-lg font-bold text-primary">KSh {transaction.amount?.toLocaleString()}</p>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium">Status</label>
+                                    <Badge className="mt-1">{transaction.status}</Badge>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium">Submitted By</label>
+                                    <p>{transaction.user_profiles?.full_name}</p>
+                                  </div>
+                                  <div>
+                                    <label className="text-sm font-medium">Date</label>
+                                    <p>{new Date(transaction.created_at).toLocaleDateString()}</p>
+                                  </div>
+                                </div>
+                                <div className="mb-4">
+                                  <label className="text-sm font-medium">Description</label>
+                                  <p className="mt-1">{transaction.description || transaction.reason || "No description provided"}</p>
+                                </div>
+                                {transaction.receipt_url && (
+                                  <div>
+                                    <label className="text-sm font-medium">Receipt</label>
+                                    <img
+                                      src={transaction.receipt_url || "/placeholder.svg"}
+                                      alt="Receipt"
+                                      className="mt-2 max-w-full h-auto rounded-lg"
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         ))}
                       
@@ -1570,6 +1736,7 @@ export default function ComprehensiveManagerDashboard({
           )}
         </div>
       </div>
-    </div>
+
+    </ResponsiveSidebar>
   );
 }
