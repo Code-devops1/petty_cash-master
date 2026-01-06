@@ -58,24 +58,26 @@ import {
   Menu
 } from "lucide-react";
 
-// Dynamically import recharts components to reduce bundle size
-const LineChart = dynamic(() => import("recharts").then(mod => mod.LineChart))
-const Line = dynamic(() => import("recharts").then(mod => mod.Line))
-const PieChart = dynamic(() => import("recharts").then(mod => mod.PieChart))
-const Pie = dynamic(() => import("recharts").then(mod => mod.Pie))
-const Cell = dynamic(() => import("recharts").then(mod => mod.Cell))
-const ResponsiveContainer = dynamic(() => import("recharts").then(mod => mod.ResponsiveContainer))
-const Tooltip = dynamic(() => import("recharts").then(mod => mod.Tooltip))
-const CartesianGrid = dynamic(() => import("recharts").then(mod => mod.CartesianGrid))
-const XAxis = dynamic(() => import("recharts").then(mod => mod.XAxis))
-const YAxis = dynamic(() => import("recharts").then(mod => mod.YAxis))
+// Import recharts wrapper components to avoid dynamic import type issues
+import {
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  CartesianGrid,
+  XAxis,
+  YAxis
+} from "@/components/recharts-wrapper";
 
 // Dynamically import dialog components
-const Dialog = dynamic(() => import("@/components/ui/dialog").then(mod => mod.Dialog))
-const DialogContent = dynamic(() => import("@/components/ui/dialog").then(mod => mod.DialogContent))
-const DialogHeader = dynamic(() => import("@/components/ui/dialog").then(mod => mod.DialogHeader))
-const DialogTitle = dynamic(() => import("@/components/ui/dialog").then(mod => mod.DialogTitle))
-const DialogDescription = dynamic(() => import("@/components/ui/dialog").then(mod => mod.DialogDescription))
+const Dialog = dynamic(() => import("@/components/ui/dialog").then(mod => mod.Dialog)) as any;
+const DialogContent = dynamic(() => import("@/components/ui/dialog").then(mod => mod.DialogContent)) as any;
+const DialogHeader = dynamic(() => import("@/components/ui/dialog").then(mod => mod.DialogHeader)) as any;
+const DialogTitle = dynamic(() => import("@/components/ui/dialog").then(mod => mod.DialogTitle)) as any;
+const DialogDescription = dynamic(() => import("@/components/ui/dialog").then(mod => mod.DialogDescription)) as any;
 
 // Loading component for dynamic icons
 const IconFallback = () => <div className="w-4 h-4" />
@@ -1038,7 +1040,7 @@ export default function ComprehensiveManagerDashboard({
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="month" />
                           <YAxis />
-                          <Tooltip formatter={(value) => [`KSh ${Number(value).toLocaleString()}`, 'Amount']} />
+                          <Tooltip formatter={(value: any, name: any) => [`KSh ${Number(value).toLocaleString()}`, 'Amount']} />
                           <Line type="monotone" dataKey="amount" stroke="#84cc16" strokeWidth={2} />
                         </LineChart>
                       </ResponsiveContainer>
@@ -1046,58 +1048,40 @@ export default function ComprehensiveManagerDashboard({
                     <div>
                       <h3 className="text-lg font-medium mb-4">Budget Utilization</h3>
                       <ResponsiveContainer width="100%" height={300}>
-                        <PieChart>
-                          <Pie
-                            data={(() => {
-                              const approvedAmount = transactions
-                                .filter((t: any) => t.status === 'approved' || t.status === 'completed')
-                                .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0);
-                              
-                              // Calculate department budget (this would come from budget_limits table in a real implementation)
-                              const monthlyBudget = 500000; // This should be fetched from budget_limits table
-                              const remaining = Math.max(0, monthlyBudget - approvedAmount);
-                              
-                              return [
-                                { name: "Used", value: approvedAmount, fill: "#ef4444" },
-                                { name: "Remaining", value: remaining, fill: "#10b981" },
-                              ];
-                            })()}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={80}
-                            label
-                          >
-                            {(() => {
-                              const data = [
-                                { name: "Used", value: transactions
-                                  .filter((t: any) => t.status === 'approved' || t.status === 'completed')
-                                  .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0), fill: "#ef4444" },
-                                { name: "Remaining", value: Math.max(0, 500000 - transactions
-                                  .filter((t: any) => t.status === 'approved' || t.status === 'completed')
-                                  .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0)), fill: "#10b981" },
-                              ];
-                              
-                              return data.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.fill} />
-                              ));
-                            })()}
-                          </Pie>
-                          <Tooltip formatter={(value) => [`KSh ${Number(value).toLocaleString()}`, 'Amount']} />
-                        </PieChart>
-                        <div className="mt-4 text-center">
-                          <p className="text-2xl font-bold">
-                            {(() => {
-                              const approvedAmount = transactions
-                                .filter((t: any) => t.status === 'approved' || t.status === 'completed')
-                                .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0);
-                              const monthlyBudget = 500000;
-                              const utilization = monthlyBudget > 0 ? Math.round((approvedAmount / monthlyBudget) * 100) : 0;
-                              return `${utilization}%`;
-                            })()}
-                          </p>
-                          <p className="text-sm text-muted-foreground">of department budget used</p>
-                        </div>
+                        {(() => {
+                          const approvedAmount = transactions
+                            .filter((t: any) => t.status === 'approved' || t.status === 'completed')
+                            .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0);
+
+                          const monthlyBudget = 500000;
+                          const remaining = Math.max(0, monthlyBudget - approvedAmount);
+
+                          const pieData = [
+                            { name: "Used", value: approvedAmount, fill: "#ef4444" },
+                            { name: "Remaining", value: remaining, fill: "#10b981" },
+                          ];
+
+                          const cells = pieData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.fill} />
+                          ));
+
+                          return (
+                            <PieChart>
+                              <Pie
+                                data={pieData}
+                                dataKey="value"
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={80}
+                                label
+                              >
+                                {cells}
+                              </Pie>
+                              <Tooltip formatter={(value: any, name: any) => [`KSh ${Number(value).toLocaleString()}`, 'Amount']} />
+                            </PieChart>
+                          );
+                        })()}
                       </ResponsiveContainer>
                     </div>
                   </div>
