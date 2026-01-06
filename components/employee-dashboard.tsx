@@ -41,7 +41,7 @@ export default function EmployeeDashboard({ userId }: EmployeeDashboardProps) {
 
   const fetchTransactions = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error }: { data: RawTransaction[] | null; error: any } = await supabase
         .from("transactions")
         .select(`
           id,
@@ -260,4 +260,14 @@ export default function EmployeeDashboard({ userId }: EmployeeDashboardProps) {
       </Card>
     </div>
   )
+}
+
+// Define the shape of raw data from Supabase
+interface RawTransaction {
+  id: string;
+  amount: number;
+  description: string;
+  status: string;
+  created_at: string;
+  categories: Array<{ name: string }> | null;
 }
