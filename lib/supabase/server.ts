@@ -1,6 +1,6 @@
-import { createServerClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
-import { cache } from "react"
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { cookies } from "next/headers";
+import { cache } from "react";
 
 // Check if Supabase environment variables are available
 export const isSupabaseConfigured =
@@ -35,12 +35,12 @@ export function createClient() {
           const cookieStore = await cookies()
           return cookieStore.getAll()
         },
-        async setAll(cookiesToSet) {
+        async setAll(cookiesToSet: { name: string; value: string; options?: CookieOptions }[]) {
           try {
-            const cookieStore = await cookies()
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options)
-            })
+            await Promise.all(cookiesToSet.map(async ({ name, value, options }) => {
+              const cookieStore = await cookies()
+              return cookieStore.set(name, value, options)
+            }))
           } catch {
             // The `setAll` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing

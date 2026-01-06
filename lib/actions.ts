@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
-import { createServerClient } from "@supabase/auth-helpers-nextjs"
 import { sendSMS, generateVerificationCode, isTwilioConfigured } from "@/lib/sms"
 
 // Sign in action
@@ -26,29 +25,7 @@ export async function signIn(prevState: any, formData: FormData) {
 
   console.log("Attempting sign in for email:", email);
 
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        async getAll() {
-          return await cookieStore.getAll()
-        },
-        async setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(async ({ name, value, options }) => {
-              await cookieStore.set(name, value, options)
-            })
-          } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
-          }
-        },
-      },
-    }
-  )
+  const supabase = createClient();
 
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -83,30 +60,8 @@ export async function signIn(prevState: any, formData: FormData) {
 export async function signInWithGoogle() {
   console.log("=== GOOGLE SIGN IN PROCESS STARTED ===");
   
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        async getAll() {
-          return await cookieStore.getAll()
-        },
-        async setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(async ({ name, value, options }) => {
-              await cookieStore.set(name, value, options)
-            })
-          } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
-          }
-        },
-      },
-    }
-  )
-
+  const supabase = createClient();
+  
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -132,30 +87,8 @@ export async function signInWithGoogle() {
 export async function signUpWithGoogle() {
   console.log("=== GOOGLE SIGN UP PROCESS STARTED ===");
   
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        async getAll() {
-          return await cookieStore.getAll()
-        },
-        async setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(async ({ name, value, options }) => {
-              await cookieStore.set(name, value, options)
-            })
-          } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
-          }
-        },
-      },
-    }
-  )
-
+  const supabase = createClient();
+  
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -200,32 +133,11 @@ export async function signUp(prevState: any, formData: FormData) {
     return { error: "Email, password, full name, and role are required" }
   }
 
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        async getAll() {
-          return await cookieStore.getAll()
-        },
-        async setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(async ({ name, value, options }) => {
-              await cookieStore.set(name, value, options)
-            })
-          } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
-          }
-        },
-      },
-    }
-  )
+  const supabase = createClient()
 
   try {
     console.log("Checking if user already exists in auth system");
+
     // First check if user already exists in public.users table
     const { data: existingUser, error: existingUserError } = await supabase
       .from('users')
@@ -338,30 +250,8 @@ export async function signUpWithEmail(email: string, password: string, full_name
 
 // Sign out action
 export async function signOut() {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        async getAll() {
-          return await cookieStore.getAll()
-        },
-        async setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(async ({ name, value, options }) => {
-              await cookieStore.set(name, value, options)
-            })
-          } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
-          }
-        },
-      },
-    }
-  )
-
+  const supabase = createClient();
+  
   await supabase.auth.signOut()
   redirect("/auth/login")
 }
@@ -434,12 +324,12 @@ export async function resetPassword(email: string) {
 // Send verification code via SMS
 export async function sendVerificationCode(phoneNumber: string) {
   try {
-    const supabase = createClient();
-    
     // Validate phone number format (basic validation)
     if (!phoneNumber || phoneNumber.length < 10) {
       return { error: "Please provide a valid phone number" };
     }
+    
+    const supabase = createClient();
 
     // Generate verification code
     const code = generateVerificationCode();
@@ -625,7 +515,7 @@ export async function resendVerificationEmail(email: string) {
 }
 
 export async function createTransaction(formData: FormData) {
-  const supabase = createClient()
+  const supabase = createClient();
   
   // Get current user
   const { data: { user } } = await supabase.auth.getUser()
@@ -762,29 +652,7 @@ export async function adminCreateUser(
   
   console.log("Creating user with data:", { email, fullName, phoneNumber, employeeId, role, department });
 
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        async getAll() {
-          return await cookieStore.getAll()
-        },
-        async setAll(cookiesToSet) {
-          try {
-            cookiesToSet.forEach(async ({ name, value, options }) => {
-              await cookieStore.set(name, value, options)
-            })
-          } catch {
-            // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
-          }
-        },
-      },
-    }
-  )
+  const supabase = createClient();
 
   try {
     console.log("Checking if user already exists in auth system");
