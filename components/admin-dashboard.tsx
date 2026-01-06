@@ -9,6 +9,19 @@ import Link from "next/link"
 import { PendingApprovals } from "./pending-approvals"
 import { RecentActivity } from "./recent-activity"
 
+// Define types for our data
+interface Transaction {
+  id: string;
+  amount: string;
+  status: string;
+  created_at: string;
+}
+
+interface Disbursement {
+  amount: string;
+  status: string;
+}
+
 interface AdminStats {
   totalTransactions: number
   pendingApprovals: number
@@ -41,8 +54,8 @@ export default function AdminDashboard() {
         supabase.from("disbursements").select("amount, status"),
       ])
 
-      const transactions = transactionsResult.data || []
-      const disbursements = disbursementsResult.data || []
+      const transactions: Transaction[] = transactionsResult.data || []
+      const disbursements: Disbursement[] = disbursementsResult.data || []
 
       const pending = transactions.filter((t) => t.status === "pending").length
       const approved = transactions.filter((t) => t.status === "approved").length
