@@ -187,22 +187,33 @@ Verify your Supabase credentials in `.env.local` and check that your database is
 
 ## Deployment
 
-### Vercel Deployment
+The application can be deployed to Vercel or any platform that supports Next.js serverless functions.
 
-1. Push your code to GitHub/GitLab
-2. Connect your repository to Vercel
-3. Add environment variables in Vercel dashboard
-4. Deploy!
+### Vercel Deployment Specifics
 
-### Manual Deployment
+When deploying to Vercel, consider the following:
 
-Build the application:
+1. Ensure all required environment variables are configured in the Vercel dashboard
+2. Use the build command: `pnpm build`
+3. For the root directory, make sure you're targeting the correct directory if your project is in a subfolder
+4. Runtime version should be set to the latest Node.js version supported by Next.js 15
+5. Environment variables needed for Vercel deployment:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `NEXT_PUBLIC_SITE_URL` (set to your Vercel deployment URL)
+   - `MPESA_*` variables if using M-Pesa integration
+   - `TWILIO_*` variables if using SMS services
 
-```bash
-pnpm build
-```
+### Performance Considerations
 
-Then serve the built files using any static hosting service or Node.js server.
+For optimal performance on Vercel:
+
+1. Enable gzip compression (done automatically by Vercel)
+2. Leverage Vercel's edge caching for static assets
+3. Consider using Vercel's Analytics for monitoring performance
+4. Use Vercel's Image Optimization API instead of disabling image optimization
+5. Monitor your bundle size using tools like `@next/bundle-analyzer`
 
 ## Contributing
 

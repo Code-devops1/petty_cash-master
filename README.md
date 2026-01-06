@@ -74,6 +74,29 @@ Before you begin, ensure you have the following installed:
    - [02-seed-data.sql](file:///C:/Users/Administrator/Downloads/petty_cash-master/petty_cash-master/scripts/02-seed-data.sql)
    - And any other necessary scripts
 
+## Vercel Deployment
+
+To deploy this application to Vercel, follow these steps:
+
+1. Push your code to a GitHub repository
+2. Go to [Vercel dashboard](https://vercel.com/dashboard)
+3. Click "New Project" and import your repository
+4. Configure the following environment variables in Vercel:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY`
+   - `NEXT_PUBLIC_SITE_URL` (should be your Vercel deployment URL)
+   - `MPESA_CONSUMER_KEY` (if using M-Pesa integration)
+   - `MPESA_CONSUMER_SECRET` (if using M-Pesa integration)
+   - `TWILIO_ACCOUNT_SID` (if using SMS notifications)
+   - `TWILIO_AUTH_TOKEN` (if using SMS notifications)
+   - `TWILIO_PHONE_NUMBER` (if using SMS notifications)
+5. Make sure the build command is set to `pnpm build`
+6. Set the framework preset to "Next.js"
+7. Click "Deploy"
+
+Your application will be deployed and available at the URL provided by Vercel.
+
 ## Project Structure
 
 ```

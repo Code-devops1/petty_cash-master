@@ -1,16 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,  // Enable ESLint during builds to catch errors early
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,  // Enable TS errors during builds to catch errors early
   },
   images: {
-    unoptimized: true,
+    unoptimized: false,  // Allow image optimization in production
   },
-  // Configure allowed origins for development
-  allowedDevOrigins: ['http://10.72.120.243:3000', 'http://localhost:3000', 'http://localhost:3001'],
+  // Remove development-specific origins
   // Enable performance optimizations
   compress: true,
   // Optimize react server components
@@ -26,6 +25,7 @@ const nextConfig = {
     }
     
     // Ignore system files that cause Watchpack errors on Windows
+    // Only apply Windows-specific ignores when on Windows
     if (process.platform === 'win32') {
       config.watchOptions = {
         ignored: [
