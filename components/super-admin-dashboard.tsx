@@ -81,8 +81,8 @@ export default function SuperAdminDashboard({ user, profile }: SuperAdminDashboa
 
   const updateConfig = async (key: string, value: string) => {
     try {
-      const { error } = await supabase
-        .from("system_config")
+      const { error } = await (supabase
+        .from("system_config") as any)
         .update({ value })
         .eq("key", key)
 

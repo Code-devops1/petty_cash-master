@@ -67,17 +67,21 @@ export default function TransactionForm({ categories, userId }: TransactionFormP
       
       const transactionData = {
         user_id: userId,
-        category_id: categoryId,
+        category_id: categoryId.toString(),
         amount: Number(amount),
-        reason: description?.toString() || "",
-        status: "PENDING",
-        quantity: 1,
-        total_amount: Number(amount),
+        description: description?.toString() || "",
+        location: location?.toString() || null,
+        transaction_type: transactionType?.toString() || "",
+        status: "pending",
       };
       
       console.log("Transaction data to insert:", transactionData);
       
-      const { error: insertError, data: insertData } = await supabase.from("transactions").insert([transactionData]).select();
+      const { error: insertError, data: insertData } = await supabase
+        .from("transactions")
+        // Type assertion to work around type mismatch
+        .insert([transactionData] as any)
+        .select();
       
       console.log("Insert result:", { insertError, insertData });
       

@@ -45,8 +45,8 @@ export async function POST(request: Request) {
     // For now, we'll just simulate a successful response
     
     // Update transaction status
-    const { error: updateError } = await supabase
-      .from("transactions")
+    const { error: updateError } = await (supabase
+      .from("transactions") as any)
       .update({ 
         status: "COMPLETED",
         mpesa_receipt_id: "SIMULATED_MPESA_" + Date.now()

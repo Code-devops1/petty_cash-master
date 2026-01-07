@@ -38,8 +38,8 @@ export async function processMpesaCallback(callbackData: any): Promise<void> {
 
     // Update disbursement status
     const status = resultCode === 0 ? "completed" : "failed"
-    await supabase
-      .from("disbursements")
+    await (supabase
+      .from("disbursements") as any)
       .update({
         status,
         completed_at: new Date().toISOString(),
@@ -50,7 +50,7 @@ export async function processMpesaCallback(callbackData: any): Promise<void> {
 
     // Update transaction status
     if (resultCode === 0) {
-      await supabase.from("transactions").update({ status: "completed" }).eq("id", disbursement.transaction_id)
+      await (supabase.from("transactions") as any).update({ status: "completed" }).eq("id", disbursement.transaction_id)
 
       // Create notification
       await supabase.from("notifications").insert({

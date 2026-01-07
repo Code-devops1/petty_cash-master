@@ -402,8 +402,8 @@ export async function verifyCode(phoneNumber: string, code: string) {
     }
 
     // Mark code as used
-    const { error: updateError } = await supabase
-      .from('verification_codes')
+    const { error: updateError } = await (supabase
+      .from('verification_codes') as any)
       .update({ used: true })
       .eq('id', data.id);
 
@@ -566,8 +566,8 @@ export async function toggleUserStatus(userId: string, currentStatus: boolean) {
     const supabase = createClient();
     
     // Update user status
-    const { error } = await supabase
-      .from('users')
+    const { error } = await (supabase
+      .from('users') as any)
       .update({ is_active: !currentStatus })
       .eq('id', userId);
 
@@ -619,8 +619,8 @@ export async function updateUser(userId: string, userData: any) {
     const supabase = createClient();
     
     // Update user
-    const { error } = await supabase
-      .from('users')
+    const { error } = await (supabase
+      .from('users') as any)
       .update(userData)
       .eq('id', userId);
 

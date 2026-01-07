@@ -9,26 +9,24 @@ import { CheckCircle, XCircle, Clock, User, MapPin, Calendar } from "lucide-reac
 
 interface Transaction {
   id: string
-  amount: number
-  quantity: number
-  total_amount: number
-  reason: string
-  status: string
-  mpesa_receipt_id: string | null
-  mpesa_request_id: string | null
-  created_at: string
-  updated_at: string
   user_id: string
   category_id: string
-  subcategory_id: string | null
-  route_id: string | null
-  categories: { name: string } | null
+  amount: number
   description: string
-  location?: string
+  receipt_url?: string | null
+  location?: string | null
   transaction_type: string
+  status: string
+  approved_by?: string | null
+  approved_at?: string | null
+  rejection_reason?: string | null
+  created_at: string
+  updated_at: string
   users: {
     full_name: string
+    department?: string
   } | null
+  expenditure_categories?: { name: string } | null  // Updated to match the actual DB schema
 }
 
 interface TransactionApprovalCardProps {
@@ -109,7 +107,7 @@ export default function TransactionApprovalCard({ transaction, onApprove }: Tran
           </div>
           <div>
             <p className="text-slate-500">Category</p>
-            <p className="font-semibold text-slate-900">{transaction.categories?.name}</p>
+            <p className="font-semibold text-slate-900">{transaction.expenditure_categories?.name}</p>
           </div>
           <div>
             <p className="text-slate-500">Type</p>

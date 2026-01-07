@@ -58,7 +58,8 @@ export default function ExpenseForm({ categories, userId }: ExpenseFormProps) {
     setError("")
 
     try {
-      const { error: insertError } = await supabase.from("transactions").insert({
+      // Define the transaction data
+      const transactionData = {
         user_id: userId,
         amount: Number.parseFloat(formData.amount),
         description: formData.description,
@@ -67,7 +68,11 @@ export default function ExpenseForm({ categories, userId }: ExpenseFormProps) {
         receipt_url: formData.receipt_url,
         status: "pending",
         transaction_type: "expense",
-      })
+      };
+
+      const { error: insertError } = await supabase
+        .from("transactions")
+        .insert([transactionData] as any); // Type assertion only for this specific operation
 
       if (insertError) throw insertError
 

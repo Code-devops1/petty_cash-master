@@ -1,6 +1,5 @@
 'use client';
 
-import React, { forwardRef } from 'react';
 import { 
   LineChart as RechartsLineChart,
   Line as RechartsLine,
@@ -14,53 +13,15 @@ import {
   YAxis as RechartsYAxis,
 } from 'recharts';
 
-// Create wrapper components to avoid dynamic import type issues and properly forward refs
-export const LineChart = forwardRef<any, React.ComponentProps<typeof RechartsLineChart>>(
-  (props, ref) => <RechartsLineChart {...props} ref={ref} />
-);
-LineChart.displayName = 'LineChart';
-
-export const Line = forwardRef<any, React.ComponentProps<typeof RechartsLine>>(
-  (props, ref) => <RechartsLine {...props} ref={ref} />
-);
-Line.displayName = 'Line';
-
-export const PieChart = forwardRef<any, React.ComponentProps<typeof RechartsPieChart>>(
-  (props, ref) => <RechartsPieChart {...props} ref={ref} />
-);
-PieChart.displayName = 'PieChart';
-
-export const Pie = forwardRef<any, React.ComponentProps<typeof RechartsPie>>(
-  (props, ref) => <RechartsPie {...props} ref={ref} />
-);
-Pie.displayName = 'Pie';
-
-export const Cell = forwardRef<any, React.ComponentProps<typeof RechartsCell>>(
-  (props, ref) => <RechartsCell {...props} ref={ref} />
-);
-Cell.displayName = 'Cell';
-
-export const ResponsiveContainer = forwardRef<any, React.ComponentProps<typeof RechartsResponsiveContainer>>(
-  (props, ref) => <RechartsResponsiveContainer {...props} ref={ref} />
-);
-ResponsiveContainer.displayName = 'ResponsiveContainer';
-
-export const Tooltip = forwardRef<any, React.ComponentProps<typeof RechartsTooltip>>(
-  (props, ref) => <RechartsTooltip {...props} ref={ref} />
-);
-Tooltip.displayName = 'Tooltip';
-
-export const CartesianGrid = forwardRef<any, React.ComponentProps<typeof RechartsCartesianGrid>>(
-  (props, ref) => <RechartsCartesianGrid {...props} ref={ref} />
-);
-CartesianGrid.displayName = 'CartesianGrid';
-
-export const XAxis = forwardRef<any, React.ComponentProps<typeof RechartsXAxis>>(
-  (props, ref) => <RechartsXAxis {...props} ref={ref} />
-);
-XAxis.displayName = 'XAxis';
-
-export const YAxis = forwardRef<any, React.ComponentProps<typeof RechartsYAxis>>(
-  (props, ref) => <RechartsYAxis {...props} ref={ref} />
-);
-YAxis.displayName = 'YAxis';
+// Create wrapper components to avoid dynamic import type issues
+// Note: Not using forwardRef as recharts components don't support ref forwarding
+export const LineChart = (props: React.ComponentProps<typeof RechartsLineChart>) => <RechartsLineChart {...props} />;
+export const Line = (props: React.ComponentProps<typeof RechartsLine>) => <RechartsLine {...props} />;
+export const PieChart = (props: React.ComponentProps<typeof RechartsPieChart>) => <RechartsPieChart {...props} />;
+export const Pie = (props: React.ComponentProps<typeof RechartsPie>) => <RechartsPie {...props} />;
+export const Cell = (props: React.ComponentProps<typeof RechartsCell>) => <RechartsCell {...props} />;
+export const ResponsiveContainer = (props: React.ComponentProps<typeof RechartsResponsiveContainer>) => <RechartsResponsiveContainer {...props} />;
+export const Tooltip = (props: React.ComponentProps<typeof RechartsTooltip>) => <RechartsTooltip {...props} />;
+export const CartesianGrid = (props: React.ComponentProps<typeof RechartsCartesianGrid>) => <RechartsCartesianGrid {...props} />;
+export const XAxis = (props: React.ComponentProps<typeof RechartsXAxis>) => <RechartsXAxis {...props} />;
+export const YAxis = (props: React.ComponentProps<typeof RechartsYAxis>) => <RechartsYAxis {...props} />;

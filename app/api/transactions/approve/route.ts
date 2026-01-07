@@ -60,8 +60,8 @@ export async function POST(request: Request) {
     }
     
     // Update transaction status
-    const { error: updateError } = await supabase
-      .from("transactions")
+    const { error: updateError } = await (supabase
+      .from("transactions") as any)
       .update(updateData)
       .eq("id", transactionId)
       

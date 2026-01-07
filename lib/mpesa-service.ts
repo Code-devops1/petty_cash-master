@@ -137,7 +137,7 @@ class MpesaService {
 
       // Update transaction status
       if (responseData.ResponseCode === "0") {
-        await supabase.from("transactions").update({ status: "disbursed" }).eq("id", transactionId)
+        await (supabase.from("transactions") as any).update({ status: "disbursed" }).eq("id", transactionId)
 
         return {
           success: true,

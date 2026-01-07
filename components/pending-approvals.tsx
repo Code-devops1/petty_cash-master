@@ -7,14 +7,24 @@ import { AlertCircle } from "lucide-react"
 
 interface Transaction {
   id: string
+  user_id: string
+  category_id: string
   amount: number
   description: string
-  status: string
-  created_at: string
-  location?: string
+  receipt_url?: string | null
+  location?: string | null
   transaction_type: string
-  users: { full_name: string; phone_number?: string; employee_id?: string } | null
-  expenditure_categories: { name: string } | null
+  status: string
+  approved_by?: string | null
+  approved_at?: string | null
+  rejection_reason?: string | null
+  created_at: string
+  updated_at: string
+  users: {
+    full_name: string
+    department?: string
+  } | null
+  expenditure_categories?: { name: string } | null
 }
 
 interface PendingApprovalsProps {
