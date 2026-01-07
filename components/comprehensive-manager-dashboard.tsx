@@ -341,7 +341,7 @@ export default function ComprehensiveManagerDashboard({
       sidebarTitle="EasyNet Solutions "
       sidebarSubtitle="Manager Portal"
     >
-      <div ref={dashboardRef} className="flex-1 overflow-auto">
+      <div ref={dashboardRef} className="flex-1">
         <div className="p-4 md:p-6">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">

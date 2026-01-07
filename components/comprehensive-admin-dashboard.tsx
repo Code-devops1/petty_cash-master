@@ -257,7 +257,7 @@ export default function ComprehensiveAdminDashboard({
       sidebarTitle="Easy Net Solutions"
       sidebarSubtitle="Admin Portal"
     >
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1">
         <div className="p-6">
           {/* Remove the .000000000 class that was causing extra zeros */}
           {/* Header */}
