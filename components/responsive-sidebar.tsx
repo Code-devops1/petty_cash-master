@@ -158,7 +158,7 @@ export default function ResponsiveSidebar({
                     }}
                   >
                     {item.icon}
-                    <span className={sidebarOpen ? "inline" : "hidden md:hidden"}>{item.title}</span>
+                    <span className={sidebarOpen ? "inline" : "hidden lg:hidden"}>{item.title}</span>
                   </Button>
                 );
               }
@@ -175,7 +175,7 @@ export default function ResponsiveSidebar({
                     className="w-full justify-start gap-2"
                   >
                     {item.icon}
-                    <span className={sidebarOpen ? "inline" : "hidden md:hidden"}>{item.title}</span>
+                    <span className={sidebarOpen ? "inline" : "hidden lg:hidden"}>{item.title}</span>
                   </Button>
                 </Link>
               );
@@ -192,14 +192,14 @@ export default function ResponsiveSidebar({
                       {user.full_name?.charAt(0)?.toUpperCase() || 'U'}
                     </span>
                   </div>
-                  <div className={cn("flex-1 min-w-0", sidebarOpen ? "block" : "hidden md:block")}>
+                  <div className={cn("flex-1 min-w-0", sidebarOpen ? "block" : "hidden lg:block")}>
                     <p className="text-sm font-medium truncate">{user.full_name}</p>
                     <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
                   </div>
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className={cn("h-8 w-8 p-0", sidebarOpen ? "block" : "hidden md:block")}
+                    className={cn("h-8 w-8 p-0", sidebarOpen ? "block" : "hidden lg:block")}
                     asChild
                   >
                     <Link href="/dashboard/settings" onClick={handleNavClick}>
@@ -248,11 +248,15 @@ export default function ResponsiveSidebar({
         )}
 
         {/* Main Content */}
-        <div className={cn(
-          "flex-1 overflow-auto transition-all duration-300",
-          sidebarOpen && !isMobile ? "md:ml-64" : "md:ml-0",
-          isMobile ? "mt-0" : ""
-        )}>
+        <div 
+          className={cn(
+            "flex-1 overflow-auto p-6 transition-all duration-300",
+            sidebarOpen 
+              ? "lg:ml-64 md:ml-16 lg:mt-0 md:mt-0" 
+              : "md:ml-0 mt-0",
+            isMobile ? "mt-0" : "mt-0"
+          )}
+        >
           {children}
         </div>
       </div>
