@@ -62,6 +62,7 @@ export default function ResponsiveSidebar({
   useEffect(() => {
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 768);
+      // Always show sidebar on larger screens, hide on mobile
       setSidebarOpen(window.innerWidth >= 768);
     };
 
@@ -248,15 +249,11 @@ export default function ResponsiveSidebar({
         )}
 
         {/* Main Content */}
-        <div 
-          className={cn(
-            "flex-1 overflow-auto p-6 transition-all duration-300",
-            sidebarOpen 
-              ? "lg:ml-64 md:ml-16 lg:mt-0 md:mt-0" 
-              : "md:ml-0 mt-0",
-            isMobile ? "mt-0" : "mt-0"
-          )}
-        >
+        <div className={cn(
+          "flex-1 overflow-auto transition-all duration-300",
+          sidebarOpen ? "md:ml-64" : "md:ml-0",
+          isMobile ? "mt-0" : ""
+        )}>
           {children}
         </div>
       </div>
