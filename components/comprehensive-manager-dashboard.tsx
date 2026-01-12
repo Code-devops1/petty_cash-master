@@ -1728,6 +1728,96 @@ export default function ComprehensiveManagerDashboard({
           window.location.reload();
         }}
       />
+      
+      {/* Delegation Modal */}
+      <Dialog open={isDelegationModalOpen} onOpenChange={setIsDelegationModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Set Approval Delegation</DialogTitle>
+            <DialogDescription>
+              Delegate your approval authority to another team member when you're unavailable.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = new FormData(e.currentTarget as HTMLFormElement);
+            const delegateTo = formData.get('delegateTo') as string;
+            const startDate = formData.get('startDate') as string;
+            const endDate = formData.get('endDate') as string;
+            const reason = formData.get('reason') as string;
+            
+            // In a real implementation, you would call an API to save delegation
+            // For now, we'll just show an alert and close the modal
+            alert(`Delegation set to ${delegateTo} from ${startDate} to ${endDate}`);
+            setIsDelegationModalOpen(false);
+          }} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground mb-2 block">Delegate To</label>
+              <Select name="delegateTo" required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select team member" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teamMembers
+                    .filter((member: any) => member.id !== user.id)
+                    .map((member: any) => (
+                      <SelectItem key={member.id} value={member.id}>
+                        {member.full_name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground mb-2 block">Delegation Period</label>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Input 
+                    type="date" 
+                    name="startDate" 
+                    placeholder="Start date" 
+                    required
+                  />
+                </div>
+                <div className="flex-1">
+                  <Input 
+                    type="date" 
+                    name="endDate" 
+                    placeholder="End date" 
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground mb-2 block">Reason for Delegation</label>
+              <Input 
+                name="reason" 
+                placeholder="Brief explanation for delegation..." 
+                required
+              />
+            </div>
+            
+            <div className="flex justify-end gap-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsDelegationModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">
+                Set Delegation
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </ResponsiveSidebar>
   );
 }
