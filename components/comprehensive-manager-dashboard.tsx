@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/table";
 import ResponsiveSidebar from "@/components/responsive-sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { CreateUserModal } from "@/components/create-user-modal";
 import { 
   UserPlus as UserPlusIcon,
   Shield as ShieldIcon,
@@ -1723,6 +1724,14 @@ export default function ComprehensiveManagerDashboard({
         </div>
       </div>
 
+      <CreateUserModal 
+        open={isAddMemberModalOpen}
+        onOpenChange={setIsAddMemberModalOpen}
+        onUserCreated={() => {
+          // Refresh the page to show the new user in the team list
+          window.location.reload();
+        }}
+      />
     </ResponsiveSidebar>
   );
 }
