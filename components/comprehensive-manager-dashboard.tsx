@@ -967,7 +967,7 @@ export default function ComprehensiveManagerDashboard({
                       <Input placeholder="Brief explanation for delegation..." />
                     </div>
                     
-                    <Button className="w-full sm:w-auto">
+                    <Button className="w-full sm:w-auto" onClick={() => setIsDelegationModalOpen(true)}>
                       <UserPlusIcon className="mr-2 h-4 w-4" />
                       Set Delegation
                     </Button>
