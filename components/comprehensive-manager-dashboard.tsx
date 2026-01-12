@@ -334,6 +334,12 @@ export default function ComprehensiveManagerDashboard({
     }
   }, [notification]);
 
+  // State for delegation form
+  const [delegateTo, setDelegateTo] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [reason, setReason] = useState("");
+
   return (
     <ResponsiveSidebar
       user={{
@@ -931,7 +937,7 @@ export default function ComprehensiveManagerDashboard({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="text-sm font-medium text-foreground mb-2 block">Delegate To</label>
-                        <Select>
+                        <Select value={delegateTo} onValueChange={setDelegateTo}>
                           <SelectTrigger>
                             <SelectValue placeholder="Select team member" />
                           </SelectTrigger>
@@ -950,24 +956,88 @@ export default function ComprehensiveManagerDashboard({
                       <div>
                         <label className="text-sm font-medium text-foreground mb-2 block">Delegation Period</label>
                         <div className="flex gap-2">
-                          <Input 
-                            type="date" 
-                            placeholder="Start date" 
-                          />
-                          <Input 
-                            type="date" 
-                            placeholder="End date" 
-                          />
+                          <div className="flex-1">
+                            <Input 
+                              type="date" 
+                              value={startDate}
+                              onChange={(e) => setStartDate(e.target.value)}
+                              placeholder="Start date" 
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <Input 
+                              type="date" 
+                              value={endDate}
+                              onChange={(e) => setEndDate(e.target.value)}
+                              placeholder="End date" 
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
                     
                     <div>
                       <label className="text-sm font-medium text-foreground mb-2 block">Reason for Delegation</label>
-                      <Input placeholder="Brief explanation for delegation..." />
+                      <Input 
+                        value={reason}
+                        onChange={(e) => setReason(e.target.value)}
+                        placeholder="Brief explanation for delegation..." 
+                      />
                     </div>
                     
-                    <Button className="w-full sm:w-auto" onClick={() => setIsDelegationModalOpen(true)}>
+                    <Button 
+                      className="w-full sm:w-auto" 
+                      onClick={async () => {
+                        if (!delegateTo || !startDate || !endDate || !reason) {
+                          setNotification({type: "error", message: "Please fill in all fields"});
+                          return;
+                        }
+                        
+                        // Check that end date is after start date
+                        if (new Date(endDate) < new Date(startDate)) {
+                          setNotification({type: "error", message: "End date must be after start date"});
+                          return;
+                        }
+                        
+                        try {
+                          // Prepare the delegation data
+                          const delegationData = {
+                            delegator_id: user.id, // Current user is the delegator
+                            delegate_id: delegateTo, // Selected user is the delegate
+                            start_date: startDate,
+                            end_date: endDate,
+                            reason: reason
+                          };
+                          
+                          // Send the delegation data to our API route
+                          const response = await fetch('/api/delegations', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(delegationData),
+                          });
+                          
+                          const result = await response.json();
+                          
+                          if (!response.ok) {
+                            throw new Error(result.error || 'Failed to create delegation');
+                          }
+                          
+                          // Show success notification
+                          setNotification({type: "success", message: "Delegation set successfully!"});
+                          
+                          // Reset form after successful submission
+                          setDelegateTo("");
+                          setStartDate("");
+                          setEndDate("");
+                          setReason("");
+                        } catch (error: any) {
+                          console.error("Error setting delegation:", error);
+                          setNotification({type: "error", message: `Failed to set delegation: ${error.message || error}`});
+                        }
+                      }}
+                    >
                       <UserPlusIcon className="mr-2 h-4 w-4" />
                       Set Delegation
                     </Button>
@@ -1729,95 +1799,7 @@ export default function ComprehensiveManagerDashboard({
         }}
       />
       
-      {/* Delegation Modal */}
-      <Dialog open={isDelegationModalOpen} onOpenChange={setIsDelegationModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Set Approval Delegation</DialogTitle>
-            <DialogDescription>
-              Delegate your approval authority to another team member when you're unavailable.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <form onSubmit={async (e) => {
-            e.preventDefault();
-            
-            // Get form data
-            const formData = new FormData(e.currentTarget as HTMLFormElement);
-            const delegateTo = formData.get('delegateTo') as string;
-            const startDate = formData.get('startDate') as string;
-            const endDate = formData.get('endDate') as string;
-            const reason = formData.get('reason') as string;
-            
-            // In a real implementation, you would call an API to save delegation
-            // For now, we'll just show an alert and close the modal
-            alert(`Delegation set to ${delegateTo} from ${startDate} to ${endDate}`);
-            setIsDelegationModalOpen(false);
-          }} className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground mb-2 block">Delegate To</label>
-              <Select name="delegateTo" required>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select team member" />
-                </SelectTrigger>
-                <SelectContent>
-                  {teamMembers
-                    .filter((member: any) => member.id !== user.id)
-                    .map((member: any) => (
-                      <SelectItem key={member.id} value={member.id}>
-                        {member.full_name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground mb-2 block">Delegation Period</label>
-              <div className="flex gap-2">
-                <div className="flex-1">
-                  <Input 
-                    type="date" 
-                    name="startDate" 
-                    placeholder="Start date" 
-                    required
-                  />
-                </div>
-                <div className="flex-1">
-                  <Input 
-                    type="date" 
-                    name="endDate" 
-                    placeholder="End date" 
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground mb-2 block">Reason for Delegation</label>
-              <Input 
-                name="reason" 
-                placeholder="Brief explanation for delegation..." 
-                required
-              />
-            </div>
-            
-            <div className="flex justify-end gap-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsDelegationModalOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit">
-                Set Delegation
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+      {/* Removed the unnecessary delegation modal - using the existing form in the Approval Delegation section */}
     </ResponsiveSidebar>
   );
 }
