@@ -106,6 +106,8 @@ export default function ComprehensiveManagerDashboard({
   const [departmentFilter, setDepartmentFilter] = useState("all");
   const [expandedTransactionId, setExpandedTransactionId] = useState<string | null>(null);
   const [notification, setNotification] = useState<{type: string, message: string} | null>(null);
+  const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
+  const [isDelegationModalOpen, setIsDelegationModalOpen] = useState(false);
   
   const dashboardRef = useRef<HTMLDivElement>(null);
 
