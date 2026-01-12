@@ -716,7 +716,7 @@ export default function ComprehensiveManagerDashboard({
                       <SelectItem value="HR">HR</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button>
+                  <Button onClick={() => setIsAddMemberModalOpen(true)}>
                     <UserPlusIcon className="h-4 w-4 mr-2" />
                     Add Team Member
                   </Button>
