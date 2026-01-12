@@ -976,20 +976,16 @@ export default function ComprehensiveManagerDashboard({
                     <div className="mt-6">
                       <h3 className="text-lg font-medium mb-3">Current Delegations</h3>
                       <div className="space-y-3">
-                        <div className="flex items-center justify-between p-3 border rounded-lg">
-                          <div>
-                            <p className="font-medium">John Doe</p>
-                            <p className="text-sm text-muted-foreground">Jan 15, 2024 - Jan 22, 2024</p>
-                          </div>
-                          <Badge variant="secondary">Active</Badge>
-                        </div>
-                        <div className="flex items-center justify-between p-3 border rounded-lg opacity-70">
-                          <div>
-                            <p className="font-medium">Jane Smith</p>
-                            <p className="text-sm text-muted-foreground">Dec 20, 2023 - Dec 27, 2023</p>
-                          </div>
-                          <Badge variant="outline">Expired</Badge>
-                        </div>
+                        {(() => {
+                          // This would be replaced with actual delegation data from the database
+                          // For now, showing an empty state since no delegations exist
+                          return (
+                            <div className="text-center py-4 text-muted-foreground">
+                              <p>No active delegations</p>
+                              <p className="text-sm mt-1">Set up delegation when you're unavailable</p>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
                   </div>
