@@ -31,6 +31,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check that delegator and delegate are not the same person
+    if (delegator_id === delegate_id) {
+      return Response.json(
+        { error: 'Cannot delegate to yourself' },
+        { status: 400 }
+      );
+    }
+
     const supabase = createClient();
 
     // Check if delegator and delegate share a team

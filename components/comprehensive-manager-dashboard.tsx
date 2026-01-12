@@ -988,17 +988,6 @@ export default function ComprehensiveManagerDashboard({
                     <Button 
                       className="w-full sm:w-auto" 
                       onClick={async () => {
-                        if (!delegateTo || !startDate || !endDate || !reason) {
-                          setNotification({type: "error", message: "Please fill in all fields"});
-                          return;
-                        }
-                        
-                        // Check that end date is after start date
-                        if (new Date(endDate) < new Date(startDate)) {
-                          setNotification({type: "error", message: "End date must be after start date"});
-                          return;
-                        }
-                        
                         try {
                           // Prepare the delegation data
                           const delegationData = {
@@ -1008,6 +997,14 @@ export default function ComprehensiveManagerDashboard({
                             end_date: endDate,
                             reason: reason
                           };
+                          
+                          // Validate that all required fields are present
+                          if (!delegationData.delegator_id || !delegationData.delegate_id || 
+                              !delegationData.start_date || !delegationData.end_date || 
+                              !delegationData.reason) {
+                            setNotification({type: "error", message: "Please fill in all fields"});
+                            return;
+                          }
                           
                           // Send the delegation data to our API route
                           const response = await fetch('/api/delegations', {
@@ -1021,7 +1018,8 @@ export default function ComprehensiveManagerDashboard({
                           const result = await response.json();
                           
                           if (!response.ok) {
-                            throw new Error(result.error || 'Failed to create delegation');
+                            console.error("Delegation API error:", result);
+                            throw new Error(result.error || `HTTP error! status: ${response.status}`);
                           }
                           
                           // Show success notification
